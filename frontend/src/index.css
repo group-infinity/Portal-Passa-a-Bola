@@ -29,4 +29,5 @@ body{
   color: #363537;
   font-size: var(--font-size-base);
   line-height: 1.6;
+  box-sizing: border-box;
 }

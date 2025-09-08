@@ -1,69 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LigaHeader from "./LigaHeader";
 import Jogo from "./Jogo";
 import Modal from "./Modal";
 
-import Brasil from "../../assets/placares/brasil.png";
-import Colombia from "../../assets/placares/colombia.png";
+const BACKEND_URL = "http://localhost:5000/";
 
 function Liga() {
   const [modalActive, setModalActive] = useState(false);
   const [jogoSelecionado, setJogoSelecionado] = useState(null);
+  const [ligasExibidas, setLigasExibidas] = useState([]);
+  const [loading, setLoading] = useState(true); // Estado de carregamento
 
-  const jogos = [
-    {
-      id: 1,
-      competition: "Copa América Feminina",
-      stage: "Final",
+  useEffect(() => {
+    const fetchLigas = async () => {
+      try {
+        setLoading(true); // Inicia o carregamento
+        const response = await fetch(`${BACKEND_URL}api/ligas`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setLigasExibidas(data);
+        console.log(data)
+      } catch (error) {
+        console.error("Erro ao buscar dados das ligas:", error.message);
+      } finally {
+        setLoading(false); // Finaliza o carregamento
+      }
+    };
+
+    fetchLigas();
+  }, []);
+
+  const handleJogoClick = (jogoApi, infoLiga) => {
+    const jogoFormatado = {
       time1: {
-        nome: "Brasil",
-        placar: 4,
-        img: Brasil,
-        scorers: [
-          "Angelina 45+9' (P)",
-          "Amanda Gutierres 80'",
-          "Marta 90+6', 105'",
-        ],
+        nome: jogoApi.strHomeTeam,
+        placar: jogoApi.intHomeScore ?? "-",
+        img: jogoApi.strHomeTeamBadge,
       },
       time2: {
-        nome: "Colômbia",
-        placar: 4,
-        img: Colombia,
-        scorers: [
-          "Linda Caicedo 25'",
-          "Taciane 69' (GC)",
-          "Mayra Ramírez 88'",
-          "Leicy Santos 115'",
-        ],
+        nome: jogoApi.strAwayTeam,
+        placar: jogoApi.intAwayScore ?? "-",
+        img: jogoApi.strAwayTeamBadge,
       },
-      penalty_score: "5-4",
-      data: "02/08/2025",
-      status: "Fim de jogo",
-    },
-    {
-      id: 2,
-      competition: "Copa América Feminina",
-      stage: "Final",
-      time1: {
-        nome: "Brasil",
-        placar: 2,
-        img: Brasil,
-        scorers: [],
-      },
-      time2: {
-        nome: "Colômbia",
-        placar: 1,
-        img: Colombia,
-        scorers: [],
-      },
-      penalty_score: null,
-      data: "05/08/2025",
-      status: "Fim de jogo",
-    },
-  ];
+      competition: jogoApi.strLeague,
+      stage: jogoApi.strRound,
+      data: jogoApi.dateEvent,
+      status: jogoApi.strStatus,
+      horario: jogoApi.strTime,
+      estadio: jogoApi.strVenue,
+      strLeagueLogo: infoLiga?.strBadge,
+    };
 
-  const handleJogoClick = (jogo) => {
-    setJogoSelecionado(jogo);
+    setJogoSelecionado(jogoFormatado);
     setModalActive(true);
     document.body.style.overflow = "hidden";
   };
@@ -74,16 +64,37 @@ function Liga() {
     document.body.style.overflow = "auto";
   };
 
+  if (loading) {
+    return <p>Carregando placares...</p>;
+  }
+
   return (
     <>
-      <div className="flex w-full flex-col gap-2.5">
-        <LigaHeader />
-        <div className="flex gap-3 overflow-x-auto p-1 w-full">
-          {jogos.map((jogo, index) => (
-            <Jogo key={index} jogo={jogo} onClick={handleJogoClick} />
-          ))}
-        </div>
-      </div>
+      {ligasExibidas.length === 0 ? (
+        <p>Nenhuma liga disponível no momento.</p>
+      ) : (
+        ligasExibidas.map((liga) => (
+          <div key={liga.id} className="flex w-full flex-col gap-2.5">
+            <LigaHeader info={liga.info} />
+            <div
+              className="flex w-full gap-3 overflow-x-auto p-1"
+              tabIndex="0"
+              aria-label={`Lista de jogos da liga ${liga.nome}`}
+            >
+              {(liga.jogosFuturos.length > 0
+                ? liga.jogosFuturos
+                : liga.jogosPassados
+              ).map((jogo) => (
+                <Jogo
+                  key={jogo.idEvent}
+                  jogoApi={jogo}
+                  onClick={() => handleJogoClick(jogo, liga.info)}
+                />
+              ))}
+            </div>
+          </div>
+        ))
+      )}
       <Modal
         active={modalActive}
         jogo={jogoSelecionado}

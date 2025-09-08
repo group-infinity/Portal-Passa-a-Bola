@@ -1,7 +1,9 @@
+// src/components/noticias/GrupoNoticias.jsx
+
 import Noticia from "./Noticia";
 
-import Imagem from "../../assets/noticias/santos.webp"
-import Favicon from "../../assets/noticias/favicon.png"
+import Imagem from "/noticias/santos.webp";
+import Favicon from "/noticias/favicon.png";
 
 function GrupoNoticias() {
   const dados = {
@@ -42,18 +44,38 @@ function GrupoNoticias() {
     ],
   };
 
+  // Pega as 4 primeiras notícias para preencher o grid
+  const [noticia1, noticia2, noticia3] = dados.noticias;
+
   return (
-    <div className="flex flex-wrap gap-2.5 relative">
-      {dados.noticias.map((e, index) =>
-        (<Noticia
-          key={index}
-          titulo={e.titulo}
-          resumo={e.resumo}
-          fonte={e.fonte}
-          tempo={e.tempoPublicacao}
-          img={e.imagemUrl}
-        ></Noticia>)
-      )}
+    <div className="flex flex-col gap-4 h-min md:grid md:grid-cols-4 md:grid-rows-2 md:gap-4">
+
+      <div className="md:col-span-4 h-fit">
+        <Noticia
+          key={noticia1.id}
+          {...noticia1}
+          img={noticia1.imagemUrl}
+          tempo={noticia1.tempoPublicacao}
+        />
+      </div>
+
+      <div className="md:col-span-2">
+        <Noticia
+          key={noticia2.id}
+          {...noticia2}
+          img={noticia2.imagemUrl}
+          tempo={noticia2.tempoPublicacao}
+        />
+      </div>
+
+      <div className="md:col-span-2">
+        <Noticia
+          key={noticia3.id}
+          {...noticia3}
+          img={noticia3.imagemUrl}
+          tempo={noticia3.tempoPublicacao}
+        />
+      </div>
     </div>
   );
 }

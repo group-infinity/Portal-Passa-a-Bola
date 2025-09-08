@@ -1,38 +1,33 @@
-import PointVerde from "../../assets/point-verde.png";
-import CopaAmerica from "../../assets/placares/copa-america.png";
+import { ArrowRight } from 'lucide-react';
 
-function LigaHeader() {
+// O componente agora espera a prop 'info', que é o objeto com os dados da liga
+function LigaHeader({ info }) {
+  // Adicionamos uma verificação de segurança. Se, por algum motivo,
+  // os dados da liga não chegarem, o componente simplesmente não renderiza, evitando erros.
+  if (!info) {
+    return null;
+  }
+
   return (
-    // DOCUMENTAÇÃO:
-    // O contêiner principal agora tem apenas 'flex', 'items-center' e um 'gap'.
-    // Removemos 'justify-between' porque a coluna do meio cuidará do espaçamento.
-    <div className="flex items-center gap-2.5">
-      {/* COLUNA 1: LOGO (TAMANHO FIXO) */}
-      <div className="relative flex min-h-10 min-w-10 flex-shrink-0 items-center justify-center rounded-lg border border-[rgba(0,0,0,0.25)]">
+    <div className="flex items-center gap-2.5 lg:gap-4">
+      {/* {console.log(info)} */}
+      <div className="relative flex min-h-10 min-w-10 flex-shrink-0 items-center justify-center rounded-lg border border-[rgba(0,0,0,0.25)] p-1 lg:min-h-12 lg:min-w-12">
         <img
-          src={CopaAmerica}
-          alt="Logo da Copa América Feminina"
-          className="size-7.5"
+          src={info.strBadge} // <-- DADO DINÂMICO
+          alt={`Logo da ${info.strLeague}`} // <-- DADO DINÂMICO (bom para acessibilidade)
+          className="size-7.5 lg:size-9 object-contain" // object-contain garante que a imagem não distorça
         />
       </div>
 
-      {/* COLUNA 2: TÍTULO (FLEXÍVEL) */}
-      {/* DOCUMENTAÇÃO:
-          - "flex-1": Faz esta coluna crescer para ocupar todo o espaço disponível.
-          - "min-w-0": Permite que esta coluna encolha e ative o 'truncate' no texto.
-      */}
-      <div className="flex-1 min-w-0">
-        <p className="truncate font-bold">Copa América Feminina</p>
-        <p>Finais</p>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-bold lg:text-lg">{info.strLeague}</p> {/* <-- DADO DINÂMICO */}
+        <p className="lg:text-base text-sm text-gray-600">{info.strCountry}</p> {/* <-- DADO DINÂMICO (Exemplo: "Brazil") */}
       </div>
 
-      {/* COLUNA 3: BOTÃO (TAMANHO FIXO) */}
-      <button className="flex h-fit flex-shrink-0 items-center gap-1">
-        <p className="whitespace-nowrap text-xs text-[#6EAA38] hover:underline">
-          Ver tudo
-        </p>
-        <img className="size-4" src={PointVerde} alt="Ver todos os jogos" />
-      </button>
+      <div className="flex h-fit w-fit cursor-pointer items-center gap-1 self-end">
+        <a className="text-[#6EAA38] hover:underline">Ver tudo</a>
+        <ArrowRight color="#6EAA38" className="size-6" />
+      </div>
     </div>
   );
 }
