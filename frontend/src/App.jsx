@@ -1,7 +1,9 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import Navbar from "./layouts/Navbar";
 import Footer from "./layouts/Footer";
-import Home from "./pages/Home";
 
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
 import Encontros from "./pages/Encontros";
@@ -11,23 +13,23 @@ import Sobre from "./pages/Sobre";
 
 function App() {
   return (
-    <>
+    <Router>
       <div id="root" className="flex min-h-screen flex-col">
         <Navbar />
-
         <main className="flex-grow">
-          <Home/>
-          {/* <Login /> */}
-          {/* <Cadastro/> */}
-          {/* <Encontros></Encontros> */}
-          {/* <Placares></Placares> */}
-          {/* <Noticias></Noticias> */}
-          {/* <Sobre></Sobre> */}
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/cadastro" element={<Cadastro />} />
+            <Route path="/encontros" element={<Encontros />} />
+            <Route path="/placares" element={<Placares />} />
+            <Route path="/noticias" element={<Noticias />} />
+            <Route path="/sobre" element={<Sobre />} />
+          </Routes>
         </main>
-
         <Footer />
       </div>
-    </>
+    </Router>
   );
 }
 

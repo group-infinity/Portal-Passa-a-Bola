@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { SunDim, X, CircleUserRound, Menu } from 'lucide-react'
-
+import { SunDim, X, CircleUserRound, Menu } from 'lucide-react';
+import { Link } from "react-router-dom";
 
 import Logo from "../assets/logo.png";
 
@@ -11,7 +11,6 @@ function Navbar() {
     if (ativo) {
       document.body.style.overflow = "hidden";
     }
-
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -20,21 +19,19 @@ function Navbar() {
   return (
     <header className="fixed z-999 flex h-16 w-screen justify-between bg-[#981FBA] px-6 py-2.5 lg:h-20">
       <div className="flex gap-1">
-        <a href="">
+        <Link to="/">
           <img src={Logo} alt="Logo do Passa a Bola" className="h-11 lg:h-15" />
-        </a>
+        </Link>
       </div>
 
       <div className="flex items-center gap-2.5">
-        <a href="#" className="cursor-pointer">
+        <Link to="/login">
           <CircleUserRound color="#ffffff" className="cursor-pointer size-6 lg:size-8 text-white" />
-        </a>
+        </Link>
 
         <button
           className="cursor-pointer"
-          onClick={() => {
-            setAtivo(!ativo);
-          }}
+          onClick={() => setAtivo(!ativo)}
         >
           <Menu color="#ffffff" className="cursor-pointer size-6 lg:size-8 text-white" />
         </button>
@@ -42,9 +39,7 @@ function Navbar() {
 
       <span
         className={`bg-opacity-100 absolute inset-0 h-dvh bg-black transition-opacity duration-300 ease-in-out ${ativo ? "opacity-50" : "pointer-events-none opacity-0"} `}
-        onClick={() => {
-          setAtivo(!ativo);
-        }}
+        onClick={() => setAtivo(!ativo)}
       ></span>
 
       <div
@@ -53,18 +48,16 @@ function Navbar() {
         {ativo && (
           <>
             <button
-              onClick={() => {
-                setAtivo(!ativo);
-              }}
+              onClick={() => setAtivo(!ativo)}
             >
               <X color="#ffffff" className="cursor-pointer size-6 lg:size-8 text-white" />
             </button>
 
             <nav className="self-start">
               <ul className="flex w-full flex-col gap-3.5 text-left text-2xl font-bold text-white uppercase">
-                <a href="#"><li>próximos encontros</li></a>
-                <a href="#"><li>Placares e noticias</li></a>
-                <a href="#"><li>sobre</li></a>
+                <li><Link to="/encontros" onClick={() => setAtivo(false)}>Próximos Encontros</Link></li>
+                <li><Link to="/placares" onClick={() => setAtivo(false)}>Placares e Notícias</Link></li>
+                <li><Link to="/sobre" onClick={() => setAtivo(false)}>Sobre</Link></li>
               </ul>
             </nav>
 
