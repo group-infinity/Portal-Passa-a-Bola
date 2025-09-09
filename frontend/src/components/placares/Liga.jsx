@@ -20,7 +20,7 @@ function Liga() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setLigasExibidas(data);
+        setLigasExibidas(data.slice(0, 3));
         console.log(data)
       } catch (error) {
         console.error("Erro ao buscar dados das ligas:", error.message);

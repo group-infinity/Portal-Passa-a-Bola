@@ -41,18 +41,18 @@ function Modal({ active, jogo, onClose }) {
           <div className="flex w-2/5 flex-col items-center gap-2">
             <img
               src={jogo.time1.img}
-              alt={jogo.time1.nome}
+              alt={jogo.time1.nome.indexOf("Women") === -1 ? jogo.time1.nome : jogo.time1.nome.slice(0, -5) + "Feminino"}
               className="h-12 w-16 object-contain lg:h-16 lg:w-20"
             />
-            <p className="text-base font-bold lg:text-lg">{jogo.time1.nome}</p>
+            <p className="text-base font-bold lg:text-lg">{jogo.time1.nome.indexOf("Women") === -1 ? jogo.time1.nome : jogo.time1.nome.slice(0, -5) + "Feminino"}</p>
           </div>
           <div className="flex w-2/5 flex-col items-center gap-2">
             <img
               src={jogo.time2.img}
-              alt={jogo.time2.nome}
+              alt={jogo.time2.nome.indexOf("Women") === -1 ? jogo.time2.nome : jogo.time2.nome.slice(0, -5) + "Feminino"}
               className="h-12 w-16 object-contain lg:h-16 lg:w-20"
             />
-            <p className="text-base font-bold lg:text-lg">{jogo.time2.nome}</p>
+            <p className="text-base font-bold lg:text-lg">{jogo.time2.nome.indexOf("Women") === -1 ? jogo.time2.nome : jogo.time2.nome.slice(0, -5) + "Feminino"}</p>
           </div>
         </div>
 
@@ -61,7 +61,7 @@ function Modal({ active, jogo, onClose }) {
             {jogo.time1.placar}
           </p>
           <div className="flex flex-col items-center text-center">
-            <span className="whitespace-nowrap text-xs text-gray-500 lg:text-sm">{jogo.status}</span>
+            <span className="whitespace-nowrap text-xs text-gray-500 lg:text-sm">{jogo.status === "Match Finished" ? "Encerrado" : "Não Iniciado"}</span>
             <span className="text-xl font-bold text-gray-400 lg:text-2xl">
               X
             </span>
@@ -73,7 +73,7 @@ function Modal({ active, jogo, onClose }) {
 
         <div className="mt-2 flex min-h-[60px] w-full flex-col items-center justify-center gap-1 text-center text-xs text-gray-700 lg:min-h-[80px] lg:text-sm">
           {jogo.data && <p><strong>Data:</strong> {new Date(jogo.data).toLocaleDateString('pt-BR')}</p>}
-          {jogo.horario && <p><strong>Horário:</strong> {jogo.horario}</p>}
+          {jogo.horario && <p><strong>Horário:</strong> {jogo.horario.slice(0, 5)}</p>}
           {jogo.estadio && <p><strong>Estádio:</strong> {jogo.estadio}</p>}
         </div>
       </div>

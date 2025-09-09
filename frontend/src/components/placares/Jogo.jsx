@@ -14,7 +14,7 @@ function Jogo({ jogoApi, onClick }) {
               alt={jogoApi.strHomeTeam}
               className="size-5 lg:size-7 object-contain"
             />
-            <p className="text-sm font-bold lg:text-base">{jogoApi.strHomeTeam}</p>
+            <p className="text-sm font-bold lg:text-base">{jogoApi.strHomeTeam.indexOf("Women") === -1 ? jogoApi.strHomeTeam : jogoApi.strHomeTeam.slice(0, -5) + "Feminino"}</p>
           </div>
           <p className="text-sm font-bold lg:text-base">{jogoApi.intHomeScore ?? "-"}</p>
         </div>
@@ -26,7 +26,7 @@ function Jogo({ jogoApi, onClick }) {
               alt={jogoApi.strAwayTeam}
               className="size-5 lg:size-7 object-contain"
             />
-            <p className="text-sm font-bold lg:text-base">{jogoApi.strAwayTeam}</p>
+            <p className="text-sm font-bold lg:text-base">{jogoApi.strAwayTeam.indexOf("Women") === -1 ? jogoApi.strAwayTeam : jogoApi.strAwayTeam.slice(0, -5) + "Feminino"}</p>
           </div>
           <p className="text-sm font-bold lg:text-base">{jogoApi.intAwayScore ?? "-"}</p>
         </div>
@@ -38,7 +38,7 @@ function Jogo({ jogoApi, onClick }) {
         <p className="whitespace-nowrap text-[12px] font-bold lg:text-sm">
           {new Date(jogoApi.dateEvent).toLocaleDateString('pt-BR')}
         </p>
-        <p className="whitespace-nowrap text-[12px] lg:text-sm">{jogoApi.strStatus}</p>
+        <p className="whitespace-nowrap text-[12px] lg:text-sm">{jogoApi.strStatus === "Match Finished" ? "Encerrado" : "Não Iniciado"}</p>
       </div>
     </button>
   );

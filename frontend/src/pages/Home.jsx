@@ -91,15 +91,22 @@ function Home() {
             txt={"placares e notícias"}
           />
           <div className="relative -top-5 mx-auto flex w-full flex-col items-center gap-6 p-6 md:max-w-[80%] lg:max-w-[70%]">
-            <div className="flex flex-col gap-10 lg:gap-20 my-5 lg:my-10 w-full">
+            <div className="my-5 flex w-full flex-col gap-10 lg:my-10 lg:gap-20">
               <SobreSecoes cor="#6EAA38" txt="acompanhe as ligas atuais!" />
 
-              <div className="flex w-full flex-col items-center gap-4  lg:gap-5">
-                <Liga />
-              </div>
+              <section className="flex flex-col gap-2.5">
+                <div className="flex w-full flex-col items-center gap-4 p-2 border-1 rounded-sm border-[rgba(0,0,0,0.25)] lg:gap-5">
+                  <Liga />
+                </div>
+
+                <div className="flex h-fit w-fit cursor-pointer items-center gap-1 self-end">
+                  <a className="text-[#6EAA38] hover:underline">Ver tudo</a>
+                  <ArrowRight color="#6EAA38" className="size-6" />
+                </div>
+              </section>
             </div>
 
-            <div className="flex flex-col gap-10 lg:gap-20 my-5 lg:my-10 w-full">
+            <div className="my-5 flex w-full flex-col gap-10 lg:my-10 lg:gap-20">
               <SobreSecoes
                 cor="#6EAA38"
                 txt="fique ligada no que está acontecendo!"

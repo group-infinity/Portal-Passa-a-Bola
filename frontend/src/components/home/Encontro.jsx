@@ -1,7 +1,7 @@
 function Encontro({nome, diaI, diaF, img}){
   return(
     <div className="rounded-[10px] max-w-fit h-fit p-4 flex flex-col gap-2 shadow-[0px_0px_7px_5px_#cbd5e0] flex-shrink-0">
-      <h3 className="text-xl font-bold uppercase">{nome}</h3>
+      <h3 className="!text-2xl font-bold uppercase">{nome}</h3>
 
       <div className="w-full flex justify-between">
         <div className="flex justify-center items-center p-2">

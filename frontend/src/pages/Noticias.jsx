@@ -1,0 +1,29 @@
+import Banner from "../components/home/Banner";
+import Liga from "../components/placares/Liga";
+import GrupoNoticias from "../components/noticias/GrupoNoticias";
+import SobreSecoes from "../components/home/SobreSecoes";
+
+import BannerVerdeDesk from "../assets/sections/faixa-verde-desktop.png";
+
+function Noticias() {
+  return (
+    <div className="relative flex flex-col items-center pt-26 lg:pt-30">
+      <section className="h-fit w-full">
+        <Banner
+          img={BannerVerdeDesk}
+          cor={"#6EAA38"}
+          txt={"Últimas Noticias"}
+        />
+        <div className="relative -top-5 mx-auto flex w-full flex-col items-center gap-6 p-6 md:max-w-[80%] lg:max-w-[70%]">
+          <div className="my-5 flex w-full flex-col gap-10 lg:my-10 lg:gap-20">
+            <div className="flex w-full flex-col gap-4 lg:max-h-fit">
+              <GrupoNoticias />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+export default Noticias;
