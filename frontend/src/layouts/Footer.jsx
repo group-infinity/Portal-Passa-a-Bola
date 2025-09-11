@@ -19,16 +19,16 @@ function Footer() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <div className="flex flex-col space-y-3">
-            <h4 className="text-white font-semibold text-lg">Navegação</h4>
+            <h4 className="text-white font-semibold !text-lg">Navegação</h4>
 
-            <Link to="/encontros" className="hover:text-[#981FBA] transition-colors w-fit underline">Próximos Encontros</Link>
-            <Link to="/placares" className="hover:text-[#981FBA] transition-colors w-fit underline">Placares e Notícias</Link>
-            <Link to="/sobre" className="hover:text-[#981FBA] transition-colors w-fit underline">Sobre</Link>
+            <Link to="/encontros" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Próximos Encontros</Link>
+            <Link to="/placares" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Placares e Notícias</Link>
+            <Link to="/sobre" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Sobre</Link>
           </div>
 
           <div className="flex flex-col space-y-3">
-            <h4 className="text-white font-semibold text-lg">Contato</h4>
-            <p className="flex items-center gap-2">
+            <h4 className="text-white font-semibold !text-lg">Contato</h4>
+            <p className="flex items-center gap-2 !text-base">
               <Mail className="size-6 text-white" /> passaabola@gmail.com
             </p>
 

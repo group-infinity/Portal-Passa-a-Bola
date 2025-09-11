@@ -1,11 +1,11 @@
 import Banner from "../components/home/Banner";
-import BannerRoxa from "../assets/sections/faixa-roxa.png";
+import FaixaRoxa from "../assets/sections/faixa-roxa.png";
 import Logo from "../assets/hero/logoPb.png";
 
 function Sobre() {
   return (
     <div className="relative flex flex-col items-center pt-26 lg:pt-30">
-      <Banner img={BannerRoxa} cor={"#981FBA"} txt={"Sobre Nós"} />
+      <Banner img={FaixaRoxa} cor={"#981FBA"} txt={"Sobre Nós"} />
       <div className="relative -top-5 mx-auto flex w-full flex-col items-center gap-6 p-6 md:max-w-[80%] lg:max-w-[70%]">
         {/* <img
           src={Logo}

@@ -20,7 +20,7 @@ function Modal({ active, jogo, onClose }) {
         onClick={handleModalContentClick}
       >
         <button onClick={onClose} className="absolute top-3 right-3 z-10 p-1">
-          <X color="#000" className="size-6 cursor-pointer" />
+          <X className="size-6 cursor-pointer text-[rgba(0,0,0,0.75)]" />
         </button>
 
         <div className="mt-2 flex items-center gap-3 lg:gap-4">

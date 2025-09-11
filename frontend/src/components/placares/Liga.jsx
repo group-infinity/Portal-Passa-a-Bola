@@ -44,7 +44,7 @@ function Liga() {
         placar: jogoApi.intAwayScore ?? "-",
         img: jogoApi.strAwayTeamBadge,
       },
-      competition: jogoApi.strLeague,
+      competition: infoLiga.strLeague,
       stage: jogoApi.strRound,
       data: jogoApi.dateEvent,
       status: jogoApi.strStatus,
@@ -77,7 +77,7 @@ function Liga() {
           <div key={liga.id} className="flex w-full flex-col gap-2.5">
             <LigaHeader info={liga.info} />
             <div
-              className="flex w-full gap-3 overflow-x-auto p-1"
+              className="flex w-full gap-3 overflow-x-auto pb-4"
               tabIndex="0"
               aria-label={`Lista de jogos da liga ${liga.nome}`}
             >

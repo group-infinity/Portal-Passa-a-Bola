@@ -17,10 +17,10 @@ function Navbar() {
   }, [ativo]);
 
   return (
-    <header className="fixed z-999 flex h-16 w-screen justify-between bg-[#981FBA] px-6 py-2.5 lg:h-20">
+    <header className="fixed z-999 flex h-16 w-screen justify-between items-center bg-[#981FBA] px-6 py-2.5 lg:h-20">
       <div className="flex gap-1">
         <Link to="/">
-          <img src={Logo} alt="Logo do Passa a Bola" className="h-11 lg:h-15" />
+          <img src={Logo} alt="Logo do Passa a Bola" className="h-11" />
         </Link>
       </div>
 

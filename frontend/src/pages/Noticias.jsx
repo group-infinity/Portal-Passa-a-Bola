@@ -3,14 +3,14 @@ import Liga from "../components/placares/Liga";
 import GrupoNoticias from "../components/noticias/GrupoNoticias";
 import SobreSecoes from "../components/home/SobreSecoes";
 
-import BannerVerdeDesk from "../assets/sections/faixa-verde-desktop.png";
+import BannerVerde from "../assets/sections/faixa-verde.png";
 
 function Noticias() {
   return (
     <div className="relative flex flex-col items-center pt-26 lg:pt-30">
       <section className="h-fit w-full">
         <Banner
-          img={BannerVerdeDesk}
+          img={BannerVerde}
           cor={"#6EAA38"}
           txt={"Últimas Noticias"}
         />

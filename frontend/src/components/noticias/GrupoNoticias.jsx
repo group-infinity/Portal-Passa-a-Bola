@@ -1,5 +1,3 @@
-// src/components/noticias/GrupoNoticias.jsx
-
 import Noticia from "./Noticia";
 
 import Imagem from "/noticias/santos.webp";
@@ -48,7 +46,7 @@ function GrupoNoticias() {
   const [noticia1, noticia2, noticia3] = dados.noticias;
 
   return (
-    <div className="flex flex-col gap-4 h-min md:grid md:grid-cols-4 md:grid-rows-2 md:gap-4">
+    <div className="flex flex-col gap-4 h-min lg:grid lg:grid-cols-4 lg:grid-rows-2 lg:gap-4">
 
       <div className="md:col-span-4 h-fit">
         <Noticia

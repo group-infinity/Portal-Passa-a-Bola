@@ -11,22 +11,26 @@ const Input = ({ label, type, register, error, ...rest }) => {
           type={type}
           {...rest}
           {...register}
-          className={`peer w-full px-1.5 pt-2.5 pb-1 text-left text-lg font-bold outline-0 ${
-            error ? 'focus:outline-red-500' : ''
-          }`}
+          className={`peer w-full px-1.5 pt-2.5 pb-1 text-left text-lg font-bold outline-0`}
         />
 
         <span
-          className={`before:content-[], relative h-[2px] w-full transition-colors duration-150 before:absolute before:h-[2px] before:w-0 before:transition-all before:duration-500
+          className={`
+            before:content-[] relative h-[2px] w-full transition-colors duration-150
+            before:absolute before:h-[2px] before:w-0 before:transition-all before:duration-500
+
             ${
               error
                 ? 'bg-red-500'
                 : 'bg-[rgba(0,0,0,0.25)]'
             }
+
+            {/* AQUI ESTÃO AS CORREÇÕES */}
+            peer-focus:before:w-full  {/* 1. Anima a LARGURA da linha no foco */}
             ${
               error
-                ? 'peer-focus-within:before:bg-red-500'
-                : 'peer-focus-within:before:bg-[#6EAA38]'
+                ? 'peer-focus:before:bg-red-500'
+                : 'peer-focus:before:bg-[#6EAA38]'
             }
           `}
         ></span>
