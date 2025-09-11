@@ -1,24 +1,36 @@
-import React, { useState } from "react";
+import React from "react";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
 import Input from "../components/cadastro/Input";
 import Botao from "../components/cadastro/Botao";
 import Faixa from "../components/noticias/Faixa";
 
+const loginSchema = z.object({
+  email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
+  senha: z.string().min(8, { message: "A senha deve ter no mínimo 8 caracteres." }),
+});
+
+
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    senha: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm({
+    resolver: zodResolver(loginSchema),
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = () => {
-    alert(`Enviado`);
+  const handleLogin = (data) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log("Dados do formulário:", data);
+        alert(`Login enviado com sucesso para: ${data.email}`);
+        resolve();
+      }, 2000);
+    });
   };
 
   return (
@@ -27,33 +39,28 @@ const Login = () => {
         <Faixa txt={'login'} />
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(handleLogin)}
           className="mt-12 flex w-full flex-col gap-7"
         >
           <div className="flex flex-col gap-5">
             <Input
               label="Digite seu endereço de e-mail"
               type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
               placeholder="seuemail@exemplo.com"
-              required
+              register={{...register("email")}}
+              error={errors.email}
             />
 
             <Input
               label="Senha"
               type="password"
-              name="senha"
-              value={formData.senha}
-              onChange={handleChange}
               placeholder="Crie uma senha forte"
-              required
-              minLength="8"
+              register={{...register("senha")}}
+              error={errors.senha}
             />
           </div>
 
-          <Botao txt={'entrar'}/>
+          <Botao txt={'entrar'} disabled={isSubmitting} />
         </form>
 
         <div className="mt-3 flex flex-col gap-2.5 text-[#981FBA] underline lg:text-xl">
@@ -61,7 +68,7 @@ const Login = () => {
             <a href="#">Esqueceu a senha?</a>
           </p>
           <p>
-            <a href="#">Nova por aqui? Cadastre-se!</a>
+            <Link to="/cadastro" href="#">Nova por aqui? Cadastre-se!</Link>
           </p>
         </div>
       </div>

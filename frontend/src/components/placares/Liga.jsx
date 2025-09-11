@@ -3,7 +3,7 @@ import LigaHeader from "./LigaHeader";
 import Jogo from "./Jogo";
 import Modal from "./Modal";
 
-const BACKEND_URL = "http://localhost:5000/";
+const BACKEND_URL = import.meta.env.VITE_API_URL;
 
 function Liga() {
   const [modalActive, setModalActive] = useState(false);
@@ -14,7 +14,7 @@ function Liga() {
   useEffect(() => {
     const fetchLigas = async () => {
       try {
-        setLoading(true); // Inicia o carregamento
+        setLoading(true);
         const response = await fetch(`${BACKEND_URL}api/ligas`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -25,7 +25,7 @@ function Liga() {
       } catch (error) {
         console.error("Erro ao buscar dados das ligas:", error.message);
       } finally {
-        setLoading(false); // Finaliza o carregamento
+        setLoading(false);
       }
     };
 

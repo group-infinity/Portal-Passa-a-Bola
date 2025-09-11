@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import Banner from "../components/home/Banner";
 import Encontro from "../components/home/Encontro";
@@ -77,7 +78,7 @@ function Home() {
               </div>
 
               <div className="flex h-fit w-fit cursor-pointer items-center gap-1 self-end">
-                <a className="text-[#BA1B31] hover:underline">Ver tudo</a>
+                <Link to="/encontros" className="text-[#BA1B31] hover:underline">Ver tudo</Link>
                 <ArrowRight color="#BA1B31" className="size-6" />
               </div>
             </div>
@@ -100,7 +101,7 @@ function Home() {
                 </div>
 
                 <div className="flex h-fit w-fit cursor-pointer items-center gap-1 self-end">
-                  <a className="text-[#6EAA38] hover:underline">Ver tudo</a>
+                  <Link to="/placares" className="text-[#6EAA38] hover:underline">Ver tudo</Link>
                   <ArrowRight color="#6EAA38" className="size-6" />
                 </div>
               </section>
@@ -115,7 +116,7 @@ function Home() {
                 <GrupoNoticias />
 
                 <div className="flex h-fit w-fit cursor-pointer items-center gap-1 self-end">
-                  <a className="text-[#6EAA38] hover:underline">Ver tudo</a>
+                  <Link to="/noticias" className="text-[#6EAA38] hover:underline">Ver tudo</Link>
                   <ArrowRight color="#6EAA38" className="size-6" />
                 </div>
               </div>
