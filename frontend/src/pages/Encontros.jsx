@@ -1,13 +1,15 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Banner from "../components/home/Banner";
 import Encontro from "../components/home/Encontro";
 import SobreSecoes from "../components/home/SobreSecoes";
 import { useAuth } from "../context/AuthContext";
 import FaixaVermelha from "../assets/sections/faixa-vermelha.png";
-import { useEffect } from "react";
 
 function Encontros() {
-
   const { isAdmin } = useAuth();
+  const [encontros, setEncontros] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEncontros = async () => {
@@ -40,21 +42,25 @@ function Encontros() {
           />
 
           {isAdmin && (
-                <Link to="/admin/criar-encontro" className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition-colors">
-                    + Novo Encontro
-                </Link>
-             )}
+            <Link to="/admin/criar-encontro" className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition-colors">
+              + Novo Encontro
+            </Link>
+          )}
 
           <div className="relative mt-4 flex flex-col w-full gap-4 md:grid md:grid-cols-2">
-            {[...Array(9)].map((_, i) => (
-              <Encontro
-                key={i}
-                nome={`Encontro nº${i + 1}`}
-                diaI="27/10/2025"
-                diaF="30/10/2025"
-                encontro={true}
-              />
-            ))}
+            {loading ? (
+              <p>Carregando encontros...</p>
+            ) : (
+              encontros.map((encontroItem) => (
+                <Encontro
+                  key={encontroItem.id}
+                  nome={encontroItem.nome}
+                  diaI={encontroItem.diaI}
+                  diaF={encontroItem.diaF}
+                  encontro={true}
+                />
+              ))
+            )}
           </div>
         </div>
       </section>

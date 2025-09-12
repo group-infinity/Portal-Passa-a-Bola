@@ -1,10 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import Input from "../components/cadastro/Input";
 import Botao from "../components/cadastro/Botao";
 import Faixa from "../components/noticias/Faixa";
@@ -14,7 +13,6 @@ const loginSchema = z.object({
   senha: z.string().min(8, { message: "A senha deve ter no mínimo 8 caracteres." }),
 });
 
-
 const Login = () => {
   const {
     register,
@@ -23,6 +21,8 @@ const Login = () => {
   } = useForm({
     resolver: zodResolver(loginSchema),
   });
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async (data) => {
     try {
@@ -31,13 +31,13 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
- 
+
       const result = await response.json();
- 
+
       if (response.ok) {
         alert(`Login bem-sucedido! Bem-vindo, ${result.user.role}.`);
-        login(result.user); // Atualiza o estado global
-        navigate('/encontros'); // Redireciona para a página de encontros
+        login(result.user, result.token); // Salva o usuário e o token
+        navigate('/encontros');
       } else {
         throw new Error(result.error);
       }
@@ -46,9 +46,6 @@ const Login = () => {
     }
   };
 
-  const { login } = useAuth(); 
-  const navigate = useNavigate();
-  
   return (
     <main className="flex w-full flex-col items-center mt-16 py-16 lg:py-30">
       <div className="w-full px-6 md:max-w-[60%] lg:max-w-[45%]">
