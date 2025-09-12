@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import Input from "../components/cadastro/Input";
 import Botao from "../components/cadastro/Botao";
 import Faixa from "../components/noticias/Faixa";
@@ -23,16 +24,31 @@ const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const handleLogin = (data) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("Dados do formulário:", data);
-        alert(`Login enviado com sucesso para: ${data.email}`);
-        resolve();
-      }, 2000);
-    });
+  const handleLogin = async (data) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+ 
+      const result = await response.json();
+ 
+      if (response.ok) {
+        alert(`Login bem-sucedido! Bem-vindo, ${result.user.role}.`);
+        login(result.user); // Atualiza o estado global
+        navigate('/encontros'); // Redireciona para a página de encontros
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      alert(`Erro no login: ${error.message}`);
+    }
   };
 
+  const { login } = useAuth(); 
+  const navigate = useNavigate();
+  
   return (
     <main className="flex w-full flex-col items-center mt-16 py-16 lg:py-30">
       <div className="w-full px-6 md:max-w-[60%] lg:max-w-[45%]">

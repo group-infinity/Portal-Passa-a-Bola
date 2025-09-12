@@ -1,10 +1,30 @@
 import Banner from "../components/home/Banner";
 import Encontro from "../components/home/Encontro";
 import SobreSecoes from "../components/home/SobreSecoes";
-
+import { useAuth } from "../context/AuthContext";
 import FaixaVermelha from "../assets/sections/faixa-vermelha.png";
+import { useEffect } from "react";
 
 function Encontros() {
+
+  const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    const fetchEncontros = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}api/encontros`);
+        const data = await response.json();
+        setEncontros(data);
+      } catch (error) {
+        console.error("Erro ao buscar encontros:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEncontros();
+  }, []);
+
   return (
     <div className="relative flex flex-col items-center pt-26 lg:pt-30">
       <section className="h-fit w-full">
@@ -18,6 +38,12 @@ function Encontros() {
             cor="#BA1B31"
             txt="Jogue com a gente! Gratuito e para todas."
           />
+
+          {isAdmin && (
+                <Link to="/admin/criar-encontro" className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition-colors">
+                    + Novo Encontro
+                </Link>
+             )}
 
           <div className="relative mt-4 flex flex-col w-full gap-4 md:grid md:grid-cols-2">
             {[...Array(9)].map((_, i) => (

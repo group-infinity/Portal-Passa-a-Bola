@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { SunDim, X, CircleUserRound, Menu } from 'lucide-react';
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { LogOut } from 'lucide-react';
 
 import Logo from "../assets/logo.png";
 
 function Navbar() {
-  const [ativo, setAtivo] = useState(false);
 
+const { isAdmin, logout } = useAuth();   const [ativo, setAtivo] = useState(false);
   useEffect(() => {
     if (ativo) {
       document.body.style.overflow = "hidden";
@@ -25,16 +27,15 @@ function Navbar() {
       </div>
 
       <div className="flex items-center gap-2.5">
-        <Link to="/login">
-          <CircleUserRound color="#ffffff" className="cursor-pointer size-6 lg:size-8 text-white" />
-        </Link>
-
-        <button
-          className="cursor-pointer"
-          onClick={() => setAtivo(!ativo)}
-        >
-          <Menu color="#ffffff" className="cursor-pointer size-6 lg:size-8 text-white" />
-        </button>
+       {isAdmin ? (
+          <button onClick={logout} title="Sair">
+            <LogOut color="#ffffff" className="cursor-pointer size-6 lg:size-8 text-white" />
+          </button>
+        ) : (
+          <Link to="/login">
+            <CircleUserRound color="#ffffff" className="cursor-pointer size-6 lg:size-8 text-white" />
+          </Link>
+        )}
       </div>
 
       <span
@@ -55,9 +56,13 @@ function Navbar() {
 
             <nav className="self-start">
               <ul className="flex w-full flex-col gap-3.5 text-left text-2xl font-bold text-white uppercase">
+                {isAdmin && ( // Link Visível apenas para o Admin
+              <li><Link to="/admin/criar-encontro" onClick={() => setAtivo(false)}>Criar Encontro</Link></li>
+                )}
                 <li><Link to="/encontros" onClick={() => setAtivo(false)}>Próximos Encontros</Link></li>
                 <li><Link to="/placares" onClick={() => setAtivo(false)}>Placares e Notícias</Link></li>
                 <li><Link to="/sobre" onClick={() => setAtivo(false)}>Sobre</Link></li>
+
               </ul>
             </nav>
 
