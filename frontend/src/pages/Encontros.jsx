@@ -15,7 +15,9 @@ function Encontros() {
     const fetchEncontros = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_API_URL}api/encontros`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}api/encontros`,
+        );
         const data = await response.json();
         setEncontros(data);
       } catch (error) {
@@ -26,6 +28,12 @@ function Encontros() {
     };
     fetchEncontros();
   }, []);
+
+  const calcularVagasOcupadas = (encontro) => {
+    return encontro.inscricoes.reduce((total, insc) => {
+      return total + (insc.tipo === "conjunta" ? insc.membros.length : 1);
+    }, 0);
+  };
 
   return (
     <div className="relative flex flex-col items-center pt-26 lg:pt-30">
@@ -42,25 +50,37 @@ function Encontros() {
           />
 
           {isAdmin && (
-            <Link to="/admin/criar-encontro" className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition-colors">
+            <Link
+              to="/admin/criar-encontro"
+              className="self-end rounded bg-green-500 px-4 py-2 font-bold text-white transition-colors hover:bg-green-700"
+            >
               + Novo Encontro
             </Link>
           )}
 
-          <div className="relative mt-4 flex flex-col w-full gap-4 md:grid md:grid-cols-2">
+          <div className="relative mt-4 flex w-full flex-col gap-4 md:grid md:grid-cols-2">
             {loading ? (
-              <p>Carregando encontros...</p>
-            ) : (
-              encontros.map((encontroItem) => (
-                <Encontro
-                  key={encontroItem.id}
-                  nome={encontroItem.nome}
-                  diaI={encontroItem.diaI}
-                  diaF={encontroItem.diaF}
-                  encontro={true}
-                />
-              ))
-            )}
+                  <p>Carregando encontros...</p>
+                ) : (
+                  encontros.map((encontroItem, index) => {
+                    const vagasOcupadas = calcularVagasOcupadas(encontroItem);
+                    const isFull = vagasOcupadas >= encontroItem.totalVagas;
+
+                    return (
+                      <Encontro
+                        key={index}
+                        id={encontroItem.id}
+                        nome={encontroItem.nome}
+                        diaI={encontroItem.diaI}
+                        diaF={encontroItem.diaF}
+                        vagas={encontroItem.totalVagas}
+                        atual={vagasOcupadas}
+                        isFull={isFull}
+                        encontro={true}
+                      />
+                    );
+                  })
+                )}
           </div>
         </div>
       </section>

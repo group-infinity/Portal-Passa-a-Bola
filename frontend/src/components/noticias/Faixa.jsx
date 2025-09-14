@@ -1,10 +1,8 @@
-import Banner from "../../assets/sections/banner-roxo.png"
-
-const Faixa = ({txt}) => {
+const Faixa = ({txt, bg}) => {
   return (
     <div className="relative flex items-center justify-center overflow-hidden p-6">
       <img
-        src={Banner}
+        src={bg}
         alt={txt}
         className="absolute -z-999 select-none"
       />

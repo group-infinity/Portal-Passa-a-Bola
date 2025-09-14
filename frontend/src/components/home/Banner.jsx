@@ -1,5 +1,3 @@
-// src/components/Banner.jsx
-
 function Banner({ img, cor, txt }) {
   return (
     <div className="relative -top-5 flex w-full flex-col items-center justify-center overflow-hidden py-10 lg:py-17">

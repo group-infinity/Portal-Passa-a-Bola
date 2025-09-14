@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
     setToken(userToken);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', userToken);
+    window.location.reload();
   };
 
   const logout = () => {
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    window.location.reload();
   };
 
   const isAdmin = user && user.role === 'admin';

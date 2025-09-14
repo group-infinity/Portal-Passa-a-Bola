@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -8,6 +9,8 @@ import GrupoNoticias from "../components/noticias/GrupoNoticias";
 import SobreSecoes from "../components/home/SobreSecoes";
 import Faq from "../components/home/Faq";
 
+import { getEncontros } from "../services/EncontroService";
+
 import HeroBg from "../assets/hero/hero.png";
 import Logo from "../assets/hero/logoPb.png";
 import FaixaVerde from "../assets/sections/faixa-verde.png";
@@ -15,14 +18,38 @@ import FaixaVermelha from "../assets/sections/faixa-vermelha.png";
 import FaixaRoxa from "../assets/sections/faixa-roxa.png";
 
 function Home() {
+  const [encontros, setEncontros] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEncontros = async () => {
+      try {
+        setLoading(true);
+        const data = await getEncontros();
+        setEncontros(data.slice(0, 5));
+      } catch (error) {
+        console.error("Erro ao buscar encontros:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEncontros();
+  }, []);
+
+  const calcularVagasOcupadas = (encontro) => {
+    return encontro.inscricoes.reduce((total, insc) => {
+      return total + (insc.tipo === "conjunta" ? insc.membros.length : 1);
+    }, 0);
+  };
+
   return (
     <div className="relative flex flex-col items-center pt-16 lg:pt-20">
-      <section className="relative h-[85lvh] w-full overflow-hidden -z-999">
+      <section className="relative -z-999 h-[85lvh] w-full overflow-hidden">
         <video
           autoPlay
           loop
           muted
-          className="absolute inset-0  h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
         >
           <source src="/passaabola.mp4" type="video/mp4" />
         </video>
@@ -30,16 +57,20 @@ function Home() {
         <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/100 via-transparent to-black/100"></div>
 
         <div className="relative z-30 inline-grid h-full w-full p-6">
-          <div className="w-full  text-white self-start">
-            <h1 className="font-[Anton] text-4xl">
-              A <span className="text-[#981FBA] text-5xl">{" "} CASA {" "}</span> DO FUTEBOL FEMININO!
+          <div className="w-full self-start text-white md:max-w-1/2">
+            <h1 className="font-[Anton] text-4xl md:text-6xl">
+              A <span className="text-[#981FBA] lg:text-7xl"> CASA </span> DO
+              FUTEBOL FEMININO!
             </h1>
-            <p className="max-w-4/5 text-sm mt-2">A paixão pelo futebol feminino ganha força e se une em um só lugar! Junte-se a nós e faça parte desta transformação.</p>
+            <p className="mt-2 max-w-4/5 text-sm md:text-xl">
+              A paixão pelo futebol feminino ganha força e se une em um só
+              lugar! Junte-se a nós e faça parte desta transformação.
+            </p>
           </div>
           <img
             src={Logo}
             alt="Logo do Passa a Bola"
-            className="h-15 w-15 opacity-70 self-end justify-self-center"
+            className="h-15 w-15 self-end justify-self-center opacity-70"
           />
         </div>
       </section>
@@ -59,14 +90,28 @@ function Home() {
 
             <div className="relative mt-4 flex w-full flex-col gap-4">
               <div className="flex gap-3 overflow-x-auto pb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Encontro
-                    key={i}
-                    nome={`Encontro nº${i + 1}`}
-                    diaI="27/10/2025"
-                    diaF="30/10/2025"
-                  />
-                ))}
+                {loading ? (
+                  <p>Carregando encontros...</p>
+                ) : (
+                  encontros.map((encontroItem, index) => {
+                    const vagasOcupadas = calcularVagasOcupadas(encontroItem);
+                    const isFull = vagasOcupadas >= encontroItem.totalVagas;
+
+                    return (
+                      <Encontro
+                        key={index}
+                        id={encontroItem.id}
+                        nome={encontroItem.nome}
+                        diaI={encontroItem.diaI}
+                        diaF={encontroItem.diaF}
+                        vagas={encontroItem.totalVagas}
+                        atual={vagasOcupadas}
+                        isFull={isFull}
+                        encontro={false}
+                      />
+                    );
+                  })
+                )}
               </div>
               <div className="flex w-full justify-between">
                 <div className="flex max-w-1/2 flex-col gap-1 opacity-50">

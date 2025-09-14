@@ -13,6 +13,11 @@ import Placares from "./pages/Placares";
 import Noticias from "./pages/Noticias";
 import Sobre from "./pages/Sobre";
 
+import CriarEncontro from "./pages/admin/CriarEncontro";
+import InscricaoEncontro from "./pages/InscricaoEncontro";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import EncontroDetalhes from "./pages/admin/EncontroDetalhes";
+
 function App() {
   return (
     <Router>
@@ -25,9 +30,14 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/encontros" element={<Encontros />} />
+            <Route path="/encontros/:id/inscrever" element={<InscricaoEncontro />} />
             <Route path="/placares" element={<Placares />} />
             <Route path="/noticias" element={<Noticias />} />
             <Route path="/sobre" element={<Sobre />} />
+
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/encontros/:id" element={<EncontroDetalhes />} />
+            <Route path="/admin/criar-encontro" element={<CriarEncontro />} />
           </Routes>
         </main>
         <Footer />

@@ -42,7 +42,6 @@ function GrupoNoticias() {
     ],
   };
 
-  // Pega as 4 primeiras notícias para preencher o grid
   const [noticia1, noticia2, noticia3] = dados.noticias;
 
   return (

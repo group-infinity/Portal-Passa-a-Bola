@@ -7,33 +7,34 @@ import Input from "../components/cadastro/Input";
 import Faixa from "../components/noticias/Faixa";
 import Botao from "../components/cadastro/Botao";
 
+import Banner from "../assets/sections/banner-roxo.png";
+
 const cadastroSchema = z
-    .object({
-      nome: z.string().min(3, {
-        message: "O nome completo deve ter no mínimo 3 caracteres.",
-      }),
+  .object({
+    nome: z.string().min(3, {
+      message: "O nome completo deve ter no mínimo 3 caracteres.",
+    }),
 
-      email: z
-        .string()
-        .trim()
-        .email({ message: "Por favor, insira um formato de e-mail válido." }),
+    email: z
+      .string()
+      .trim()
+      .email({ message: "Por favor, insira um formato de e-mail válido." }),
 
-      senha: z
-        .string()
-        .min(8, { message: "A senha deve ter no mínimo 8 caracteres." }),
+    senha: z
+      .string()
+      .min(8, { message: "A senha deve ter no mínimo 8 caracteres." }),
 
-      senha_confirm: z
-        .string(),
-    })
-    .superRefine(({ senha, senha_confirm }, ctx) => {
-      if (senha !== senha_confirm) {
-        ctx.addIssue({
-          code: "custom",
-          message: "As senhas não coincidem.",
-          path: ["senha_confirm"],
-        });
-      }
-    });
+    senha_confirm: z.string(),
+  })
+  .superRefine(({ senha, senha_confirm }, ctx) => {
+    if (senha !== senha_confirm) {
+      ctx.addIssue({
+        code: "custom",
+        message: "As senhas não coincidem.",
+        path: ["senha_confirm"],
+      });
+    }
+  });
 
 const Cadastro = () => {
   const {
@@ -48,10 +49,6 @@ const Cadastro = () => {
   const handleCadastro = (data) => {
     const { senha_confirm, ...dadosParaEnvio } = data;
 
-    console.log(
-      "Formulário válido! Enviando dados para o backend:",
-      dadosParaEnvio,
-    );
     alert(
       `Cadastro enviado com sucesso para o e-mail: ${dadosParaEnvio.email}`,
     );
@@ -60,9 +57,9 @@ const Cadastro = () => {
   };
 
   return (
-    <main className="flex w-full flex-col items-center py-16 lg:py-30">
+    <div className="flex w-full flex-col items-center py-16 lg:py-30">
       <div className="w-full px-6 pt-6 lg:max-w-[45%]">
-        <Faixa txt={"cadastro"} />
+        <Faixa txt={"cadastro"} bg={Banner} />
 
         <form
           onSubmit={handleSubmit(handleCadastro)}
@@ -102,10 +99,10 @@ const Cadastro = () => {
             />
           </div>
 
-          <Botao txt={"cadastre-se"} disabled={isSubmitting} />
+          <Botao txt={"cadastre-se"} disabled={isSubmitting} color={"#981FBA"} colorHover={"#5b1587"} />
         </form>
       </div>
-    </main>
+    </div>
   );
 };
 

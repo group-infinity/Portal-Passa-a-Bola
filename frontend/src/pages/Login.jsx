@@ -3,10 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
 import { useAuth } from "../context/AuthContext";
+import { loginUser } from "../services/AuthService";
+
 import Input from "../components/cadastro/Input";
 import Botao from "../components/cadastro/Botao";
 import Faixa from "../components/noticias/Faixa";
+
+import Banner from "../assets/sections/banner-roxo.png"
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
@@ -14,11 +19,7 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting }
-  } = useForm({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(loginSchema),
   });
   const { login } = useAuth();
@@ -26,30 +27,19 @@ const Login = () => {
 
   const handleLogin = async (data) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}api/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        alert(`Login bem-sucedido! Bem-vindo, ${result.user.role}.`);
-        login(result.user, result.token); // Salva o usuário e o token
-        navigate('/encontros');
-      } else {
-        throw new Error(result.error);
-      }
+      const result = await loginUser(data);
+      alert(`Login bem-sucedido! Bem-vindo, ${result.user.role}.`);
+      login(result.user, result.token);
+      navigate('/');
     } catch (error) {
       alert(`Erro no login: ${error.message}`);
     }
   };
 
   return (
-    <main className="flex w-full flex-col items-center mt-16 py-16 lg:py-30">
+    <div className="flex w-full flex-col items-center mt-16 py-16 lg:py-30">
       <div className="w-full px-6 md:max-w-[60%] lg:max-w-[45%]">
-        <Faixa txt={'login'} />
+        <Faixa txt={'login'} bg={Banner} />
 
         <form
           onSubmit={handleSubmit(handleLogin)}
@@ -73,7 +63,7 @@ const Login = () => {
             />
           </div>
 
-          <Botao txt={'entrar'} disabled={isSubmitting} />
+          <Botao txt={'entrar'} disabled={isSubmitting} color={"#981FBA"} colorHover={"#5b1587"}/>
         </form>
 
         <div className="mt-3 flex flex-col gap-2.5 text-[#981FBA] underline lg:text-xl">
@@ -85,7 +75,7 @@ const Login = () => {
           </p>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

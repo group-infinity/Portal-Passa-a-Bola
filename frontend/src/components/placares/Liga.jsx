@@ -1,27 +1,21 @@
 import { useState, useEffect } from "react";
+import { getLigas } from "../../services/LigaService";
 import LigaHeader from "./LigaHeader";
 import Jogo from "./Jogo";
 import Modal from "./Modal";
-
-const BACKEND_URL = import.meta.env.VITE_API_URL;
 
 function Liga() {
   const [modalActive, setModalActive] = useState(false);
   const [jogoSelecionado, setJogoSelecionado] = useState(null);
   const [ligasExibidas, setLigasExibidas] = useState([]);
-  const [loading, setLoading] = useState(true); // Estado de carregamento
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchLigas = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${BACKEND_URL}api/ligas`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setLigasExibidas(data.slice(0, 3));
-        console.log(data)
+        const data = await getLigas();
+        setLigasExibidas(data);
       } catch (error) {
         console.error("Erro ao buscar dados das ligas:", error.message);
       } finally {
@@ -73,27 +67,41 @@ function Liga() {
       {ligasExibidas.length === 0 ? (
         <p>Nenhuma liga disponível no momento.</p>
       ) : (
-        ligasExibidas.map((liga) => (
-          <div key={liga.id} className="flex w-full flex-col gap-2.5">
-            <LigaHeader info={liga.info} />
-            <div
-              className="flex w-full gap-3 overflow-x-auto pb-4"
-              tabIndex="0"
-              aria-label={`Lista de jogos da liga ${liga.nome}`}
-            >
-              {(liga.jogosFuturos.length > 0
-                ? liga.jogosFuturos
-                : liga.jogosPassados
-              ).map((jogo) => (
-                <Jogo
-                  key={jogo.idEvent}
-                  jogoApi={jogo}
-                  onClick={() => handleJogoClick(jogo, liga.info)}
-                />
-              ))}
+        ligasExibidas.map((liga) => {
+          const umMesAtras = new Date();
+          umMesAtras.setMonth(umMesAtras.getMonth() - 1);
+
+          const jogosPassadosRecentes = liga.jogosPassados
+            .filter(jogo => new Date(jogo.dateEvent) >= umMesAtras)
+            .slice(0, 2);
+
+          const jogosParaExibir = liga.jogosFuturos.length > 0
+            ? liga.jogosFuturos
+            : jogosPassadosRecentes;
+
+          if (jogosParaExibir.length === 0) {
+            return null;
+          }
+
+          return (
+            <div key={liga.id} className="flex w-full flex-col gap-2.5">
+              <LigaHeader info={liga.info} />
+              <div
+                className="flex w-full gap-3 overflow-x-auto pb-4"
+                tabIndex="0"
+                aria-label={`Lista de jogos da liga ${liga.nome}`}
+              >
+                {jogosParaExibir.map((jogo) => (
+                  <Jogo
+                    key={jogo.idEvent}
+                    jogoApi={jogo}
+                    onClick={() => handleJogoClick(jogo, liga.info)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))
+          );
+        })
       )}
       <Modal
         active={modalActive}

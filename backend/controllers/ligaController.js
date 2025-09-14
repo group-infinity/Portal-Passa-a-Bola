@@ -33,7 +33,7 @@ export const getAllLigas = async (req, res) => {
       { id: 4805, nome: "Liga A Feminina da Austrália" },
       { id: 4565, nome: "Copa do Mundo Feminina da FIFA" },
       { id: 5384, nome: "Futebol Feminino nas Olimpíadas" },
-    ].slice(0, 4);
+    ].slice(0,3);
 
     let resultados = [];
     for (const liga of ligas) {
