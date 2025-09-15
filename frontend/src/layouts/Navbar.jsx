@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { SunDim, X, CircleUserRound, Menu, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Logo from "../assets/logo.png";
+import Logo from "../assets/logo.webp";
 
 function Navbar() {
   const { user, isAdmin, logout } = useAuth();

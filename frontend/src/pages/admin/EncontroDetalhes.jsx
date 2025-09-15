@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getEncontroById } from "../../services/EncontroService";
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from "lucide-react";
 
 import Banner from "../../components/home/Banner";
-import FaixaRoxa from "../../assets/sections/faixa-roxa.png";
+import FaixaRoxa from "../../assets/sections/faixa-roxa.webp";
 
 const EncontroDetalhes = () => {
   const { id } = useParams();
@@ -116,7 +116,10 @@ const EncontroDetalhes = () => {
         </div>
         <div className="mt-4 flex h-fit w-fit cursor-pointer items-center gap-1 self-start">
           <ArrowLeft color="#981FBA" className="size-6" />
-          <Link to="/admin/dashboard" className="text-[#981FBA] hover:underline">
+          <Link
+            to="/admin/dashboard"
+            className="text-[#981FBA] hover:underline"
+          >
             Voltar
           </Link>
         </div>

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { createEncontro } from "../../services/EncontroService";
 
-import BannerVermelho from "../../assets/sections/banner-verm.png";
+import BannerVermelho from "../../assets/sections/banner-verm.webp";
 
 import Input from "../../components/cadastro/Input";
 import Botao from "../../components/cadastro/Botao";

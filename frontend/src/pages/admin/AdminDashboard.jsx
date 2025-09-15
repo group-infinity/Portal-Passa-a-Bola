@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getEncontros } from "../../services/EncontroService";
 import Faixa from "../../components/noticias/Faixa";
-import FaixaRoxa from "../../assets/sections/banner-roxo.png";
+import FaixaRoxa from "../../assets/sections/banner-roxo.webp";
 
 const AdminDashboard = () => {
   const [encontros, setEncontros] = useState([]);

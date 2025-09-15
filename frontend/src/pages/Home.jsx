@@ -11,11 +11,10 @@ import Faq from "../components/home/Faq";
 
 import { getEncontros } from "../services/EncontroService";
 
-import HeroBg from "../assets/hero/hero.png";
-import Logo from "../assets/hero/logoPb.png";
-import FaixaVerde from "../assets/sections/faixa-verde.png";
-import FaixaVermelha from "../assets/sections/faixa-vermelha.png";
-import FaixaRoxa from "../assets/sections/faixa-roxa.png";
+import Logo from "../assets/logoPb.webp";
+import FaixaVerde from "../assets/sections/faixa-verde.webp";
+import FaixaVermelha from "../assets/sections/faixa-vermelha.webp";
+import FaixaRoxa from "../assets/sections/faixa-roxa.webp";
 
 function Home() {
   const [encontros, setEncontros] = useState([]);
@@ -49,9 +48,10 @@ function Home() {
           autoPlay
           loop
           muted
+          playsInline
           className="absolute inset-0 h-full w-full object-cover"
         >
-          <source src="/passaabola.mp4" type="video/mp4" />
+          <source src="/passaabola.webm" type="video/webm" />
         </video>
 
         <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/100 via-transparent to-black/100"></div>

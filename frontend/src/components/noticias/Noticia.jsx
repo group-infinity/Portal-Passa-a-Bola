@@ -6,6 +6,7 @@ function Noticia({ titulo, resumo, fonte, tempo, img }) {
           <img
             src={img}
             alt={titulo}
+            loading="lazy"
             className="w-full rounded-[2px] object-cover md:h-60"
           />
         </a>
@@ -22,6 +23,7 @@ function Noticia({ titulo, resumo, fonte, tempo, img }) {
         <img
           src={fonte.logoUrl}
           alt={`Logo de ${fonte.nome}`}
+          loading="lazy"
           className="size-6 rounded-full"
         />
         <div className="flex items-center gap-2">

@@ -4,7 +4,7 @@ import Banner from "../components/home/Banner";
 import Encontro from "../components/home/Encontro";
 import SobreSecoes from "../components/home/SobreSecoes";
 import { useAuth } from "../context/AuthContext";
-import FaixaVermelha from "../assets/sections/faixa-vermelha.png";
+import FaixaVermelha from "../assets/sections/faixa-vermelha.webp";
 
 function Encontros() {
   const { isAdmin } = useAuth();
@@ -60,27 +60,27 @@ function Encontros() {
 
           <div className="relative mt-4 flex w-full flex-col gap-4 md:grid md:grid-cols-2">
             {loading ? (
-                  <p>Carregando encontros...</p>
-                ) : (
-                  encontros.map((encontroItem, index) => {
-                    const vagasOcupadas = calcularVagasOcupadas(encontroItem);
-                    const isFull = vagasOcupadas >= encontroItem.totalVagas;
+              <p>Carregando encontros...</p>
+            ) : (
+              encontros.map((encontroItem, index) => {
+                const vagasOcupadas = calcularVagasOcupadas(encontroItem);
+                const isFull = vagasOcupadas >= encontroItem.totalVagas;
 
-                    return (
-                      <Encontro
-                        key={index}
-                        id={encontroItem.id}
-                        nome={encontroItem.nome}
-                        diaI={encontroItem.diaI}
-                        diaF={encontroItem.diaF}
-                        vagas={encontroItem.totalVagas}
-                        atual={vagasOcupadas}
-                        isFull={isFull}
-                        encontro={true}
-                      />
-                    );
-                  })
-                )}
+                return (
+                  <Encontro
+                    key={index}
+                    id={encontroItem.id}
+                    nome={encontroItem.nome}
+                    diaI={encontroItem.diaI}
+                    diaF={encontroItem.diaF}
+                    vagas={encontroItem.totalVagas}
+                    atual={vagasOcupadas}
+                    isFull={isFull}
+                    encontro={true}
+                  />
+                );
+              })
+            )}
           </div>
         </div>
       </section>

@@ -5,10 +5,12 @@ let encontros = [
 let nextId = 3;
 
 export const getAllEncontros = (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   res.json(encontros);
 };
 
 export const getEncontroById = (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   const encontro = encontros.find(e => e.id === parseInt(req.params.id));
   if (encontro) {
     res.json(encontro);

@@ -24,16 +24,13 @@ function Modal({ active, jogo, onClose }) {
       "Not Started": "Não Iniciado",
       "Match Finished": "Encerrado",
       "1H": "1º Tempo",
-      HT: "Intervalo",
       "2H": "2º Tempo",
-      ET: "Prorrogação",
-      P: "Pênaltis",
       Postponed: "Adiado",
       Cancelled: "Cancelado",
-      Abandoned: "Abandonado",
+      "Match Abandoned": "Jogo Suspenso",
     };
 
-    return statusMap[status] || (/\d/.test(status) ? `${status}'` : "Ao Vivo");
+    return statusMap[status];
   };
 
   return (

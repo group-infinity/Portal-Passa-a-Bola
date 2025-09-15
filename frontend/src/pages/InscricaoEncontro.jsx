@@ -6,7 +6,7 @@ import { z } from "zod";
 import { getEncontroById, createInscricao } from "../services/EncontroService";
 import { gerarDadosJogadora } from "../components/utils/faker";
 
-import FaixaVermelha from "../assets/sections/banner-verm.png";
+import FaixaVermelha from "../assets/sections/banner-verm.webp";
 
 import Faixa from "../components/noticias/Faixa";
 import Input from "../components/cadastro/Input";
@@ -158,13 +158,13 @@ function InscricaoEncontro() {
           <div className="flex justify-center gap-4">
             <button
               onClick={() => setTipoInscricao("individual")}
-              className={`rounded cursor-pointer px-4 py-2 font-bold ${isIndividual ? "bg-[#BA1B31] text-white" : "bg-gray-200"}`}
+              className={`cursor-pointer rounded px-4 py-2 font-bold ${isIndividual ? "bg-[#BA1B31] text-white" : "bg-gray-200"}`}
             >
               Inscrição Individual
             </button>
             <button
               onClick={() => setTipoInscricao("conjunta")}
-              className={`rounded cursor-pointer px-4 py-2 font-bold ${!isIndividual ? "bg-[#BA1B31] text-white" : "bg-gray-200"}`}
+              className={`cursor-pointer rounded px-4 py-2 font-bold ${!isIndividual ? "bg-[#BA1B31] text-white" : "bg-gray-200"}`}
             >
               Inscrição de Time
             </button>

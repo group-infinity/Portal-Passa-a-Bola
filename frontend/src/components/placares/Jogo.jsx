@@ -6,16 +6,13 @@ function Jogo({ jogoApi, onClick }) {
       "Not Started": "Não Iniciado",
       "Match Finished": "Encerrado",
       "1H": "1º Tempo",
-      HT: "Intervalo",
       "2H": "2º Tempo",
-      ET: "Prorrogação",
-      P: "Pênaltis",
       Postponed: "Adiado",
       Cancelled: "Cancelado",
-      Abandoned: "Abandonado",
+      "Match Abandoned": "Jogo Suspenso",
     };
 
-    return statusMap[status] || (/\d/.test(status) ? `${status}'` : "Ao Vivo");
+    return statusMap[status];
   };
 
   return (
@@ -69,7 +66,7 @@ function Jogo({ jogoApi, onClick }) {
           "Match Finished",
           "Postponed",
           "Cancelled",
-          "Abandoned",
+          "Match Abandoned",
         ].includes(jogoApi.strStatus) ? (
           <p className="text-[12px] font-bold whitespace-nowrap lg:text-sm">
             {new Date(jogoApi.dateEvent).toLocaleDateString("pt-BR", {

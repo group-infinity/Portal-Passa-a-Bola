@@ -7,7 +7,7 @@ import Input from "../components/cadastro/Input";
 import Faixa from "../components/noticias/Faixa";
 import Botao from "../components/cadastro/Botao";
 
-import Banner from "../assets/sections/banner-roxo.png";
+import Banner from "../assets/sections/banner-roxo.webp";
 
 const cadastroSchema = z
   .object({
@@ -99,7 +99,12 @@ const Cadastro = () => {
             />
           </div>
 
-          <Botao txt={"cadastre-se"} disabled={isSubmitting} color={"#981FBA"} colorHover={"#5b1587"} />
+          <Botao
+            txt={"cadastre-se"}
+            disabled={isSubmitting}
+            color={"#981FBA"}
+            colorHover={"#5b1587"}
+          />
         </form>
       </div>
     </div>

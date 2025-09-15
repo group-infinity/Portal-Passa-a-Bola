@@ -3,7 +3,7 @@ import Liga from "../components/placares/Liga";
 import GrupoNoticias from "../components/noticias/GrupoNoticias";
 import SobreSecoes from "../components/home/SobreSecoes";
 
-import BannerVerde from "../assets/sections/faixa-verde.png";
+import BannerVerde from "../assets/sections/faixa-verde.webp";
 
 function Placares() {
   return (
@@ -15,7 +15,7 @@ function Placares() {
             {/* <SobreSecoes cor="#6EAA38" txt="acompanhe as ligas atuais!" /> */}
 
             <section className="flex flex-col gap-2.5">
-              <div className="flex w-full flex-col items-center gap-4 rounded-sm  p-2 lg:gap-5">
+              <div className="flex w-full flex-col items-center gap-4 rounded-sm p-2 lg:gap-5">
                 <Liga />
               </div>
             </section>
