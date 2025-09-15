@@ -5,24 +5,26 @@ import authRoutes from './routes/authRoutes.js';
 import encontroRoutes from './routes/encontroRoutes.js';
 
 const app = express();
+const corsOptions = {
+  origin: process.env.FRONTEND_URL,
+  optionsSuccessStatus: 200 
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 app.use('/api', ligaRoutes);
 app.use('/api', authRoutes);
 app.use('/api', encontroRoutes);
 
+app.get('/', (req, res) => {
+  res.status(200).send('O servidor está funcionando!');
+});
+
 app.use((req, res) => {
   res.status(404).json({ error: "Rota não encontrada." });
 });
-
-const PORT = 5000;
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`Backend rodando localmente em http://localhost:${PORT}`);
-    });
-}
 
 export default app;
