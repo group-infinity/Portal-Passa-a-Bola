@@ -229,3 +229,10 @@ Busca e retorna dados de placares e jogos de ligas de futebol feminino a partir 
 
 * **Banco de Dados:** Atualmente, a aplicação utiliza um banco de dados em memória (um array no backend) para agilizar o desenvolvimento e a demonstração. Em um ambiente de produção serverless como a Vercel, isso pode levar a inconsistências de dados, pois cada requisição pode ser tratada por uma instância diferente do servidor.
 * **Evolução:** O próximo passo crucial para este projeto seria a integração com um banco de dados persistente, como **Vercel Postgres** ou **MongoDB Atlas**, para garantir a consistência e a durabilidade dos dados.
+
+## Integrantes do Grupo
+•Diogo Pelinson, RM563321
+•Jessica Tavares, RM566220
+•Luara Soares, RM561266
+•Miguel Amaro, RM566200
+•Pedro Henrique Caires, RM562344
