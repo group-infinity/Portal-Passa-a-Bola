@@ -115,9 +115,9 @@ function Home() {
               </div>
               <div className="flex w-full justify-between">
                 <div className="flex max-w-1/2 flex-col gap-1 opacity-50">
-                  <p className="w-full text-left text-xs">*Vagas limitadas.</p>
+                  <p className="w-full text-left text-xs">* Vagas limitadas.</p>
                   <p className="w-full text-left text-xs">
-                    *As inscrições podem encerrar antes do prazo.
+                    * As inscrições podem encerrar antes do prazo.
                   </p>
                 </div>
 
