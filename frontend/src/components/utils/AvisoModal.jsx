@@ -1,7 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X } from "lucide-react";
 
 const AvisoModal = ({ isOpen, onClose, title, children, imageUrl }) => {
+  useEffect(() => {
+    const mainContent = document.getElementById("main-content");
+    if (isOpen) {
+      mainContent?.setAttribute("aria-hidden", "true");
+    } else {
+      mainContent?.removeAttribute("aria-hidden");
+    }
+
+    return () => {
+      mainContent?.removeAttribute("aria-hidden");
+    };
+  }, [isOpen]);
+
   if (!isOpen) {
     return null;
   }
@@ -19,6 +32,9 @@ const AvisoModal = ({ isOpen, onClose, title, children, imageUrl }) => {
         className={`opacity-50 absolute inset-0 h-dvh bg-black transition-opacity duration-300 ease-in-out`}
       ></span>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="aviso-modal-title"
         className="relative flex w-full max-w-lg flex-col gap-4 rounded-lg bg-white p-6 shadow-lg"
         onClick={handleModalContentClick}
       >
@@ -30,7 +46,7 @@ const AvisoModal = ({ isOpen, onClose, title, children, imageUrl }) => {
           <X className="size-6" />
         </button>
 
-        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+        <h2 id="aviso-modal-title" className="text-2xl font-bold text-gray-800">{title}</h2>
 
         <div className="text-gray-600">
           {children}

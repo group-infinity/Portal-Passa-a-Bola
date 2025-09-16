@@ -28,7 +28,9 @@ const Faq = () => {
   return (
     <div className="w-full flex flex-col gap-4">
       {faqData.map((item, index) => (
-        <AccordionItem key={index} title={item.title} content={item.content} />
+        <React.Fragment key={index}>
+          <AccordionItem title={item.title} content={item.content} index={index} />
+        </React.Fragment>
       ))}
     </div>
   );

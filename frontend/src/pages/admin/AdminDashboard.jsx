@@ -41,11 +41,11 @@ const AdminDashboard = () => {
           <h2 className="mb-6 text-center text-3xl font-bold">
             Gerenciamento de Encontros
           </h2>
-          <div className="space-y-4">
+          <ul className="space-y-4">
             {encontros.map((encontro) => {
               const vagasOcupadas = calcularVagasOcupadas(encontro);
               return (
-                <div
+                <li
                   key={encontro.id}
                   className="flex flex-col items-start justify-between gap-4 rounded-lg border p-4 shadow-md sm:flex-row sm:items-center"
                 >
@@ -65,10 +65,10 @@ const AdminDashboard = () => {
                   >
                     Ver Detalhes
                   </Link>
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
       </div>
     </div>

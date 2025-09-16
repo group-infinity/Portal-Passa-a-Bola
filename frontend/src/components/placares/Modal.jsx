@@ -1,7 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X } from "lucide-react";
 
 function Modal({ active, jogo, onClose }) {
+  useEffect(() => {
+    const mainContent = document.getElementById("main-content");
+    if (active) {
+      mainContent?.setAttribute("aria-hidden", "true");
+    } else {
+      mainContent?.removeAttribute("aria-hidden");
+    }
+
+    return () => {
+      mainContent?.removeAttribute("aria-hidden");
+    };
+  }, [active]);
+
+
   if (!active || !jogo) {
     return null;
   }
@@ -39,10 +53,17 @@ function Modal({ active, jogo, onClose }) {
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
         className="relative flex w-full max-w-sm flex-col gap-4 rounded-lg bg-white p-4 shadow-lg lg:max-w-lg lg:gap-6 lg:p-6"
         onClick={handleModalContentClick}
       >
-        <button onClick={onClose} className="absolute top-3 right-3 z-10 p-1">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 z-10 p-1"
+          aria-label="Fechar modal"
+        >
           <X className="size-6 cursor-pointer text-[rgba(0,0,0,0.75)]" />
         </button>
 
@@ -53,7 +74,7 @@ function Modal({ active, jogo, onClose }) {
             className="h-8 w-8 object-contain lg:h-12 lg:w-12"
           />
           <div>
-            <h5 className="text-base font-bold lg:text-xl">
+            <h5 id="modal-title" className="text-base font-bold lg:text-xl">
               {jogo.competition}
             </h5>
             <p className="text-sm text-gray-500 lg:text-base">{jogo.stage}</p>

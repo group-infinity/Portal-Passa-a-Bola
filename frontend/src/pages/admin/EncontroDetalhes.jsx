@@ -84,16 +84,17 @@ const EncontroDetalhes = () => {
           ) : (
             <div className="overflow-x-auto rounded-lg border shadow-sm">
               <table className="min-w-full bg-white text-sm">
+                <caption className="sr-only">Lista de participantes inscritos no encontro</caption>
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-4 py-2 text-left">
+                    <th scope="col" className="px-4 py-2 text-left">
                       Nome do Participante
                     </th>
-                    <th className="px-4 py-2 text-left">Email</th>
-                    <th className="px-4 py-2 text-left">CPF</th>
-                    <th className="px-4 py-2 text-left">Telefone</th>
-                    <th className="px-4 py-2 text-left">Nascimento</th>
-                    <th className="px-4 py-2 text-left">Time / Inscrição</th>
+                    <th scope="col" className="px-4 py-2 text-left">Email</th>
+                    <th scope="col" className="px-4 py-2 text-left">CPF</th>
+                    <th scope="col" className="px-4 py-2 text-left">Telefone</th>
+                    <th scope="col" className="px-4 py-2 text-left">Nascimento</th>
+                    <th scope="col" className="px-4 py-2 text-left">Time / Inscrição</th>
                   </tr>
                 </thead>
                 <tbody>

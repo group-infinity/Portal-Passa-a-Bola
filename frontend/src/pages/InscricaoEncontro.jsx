@@ -6,14 +6,13 @@ import { z } from "zod";
 import { getEncontroById, createInscricao } from "../services/EncontroService";
 import { gerarDadosJogadora } from "../components/utils/faker";
 
-import FaixaVermelha from "../assets/sections/faixa-vermelha.webp";
+import FaixaVermelha from "../assets/sections/banner-verm.webp";
 
 import Faixa from "../components/noticias/Faixa";
 import Input from "../components/cadastro/Input";
 import Botao from "../components/cadastro/Botao";
 import AvisoModal from "../components/utils/AvisoModal";
 
-// --- Schemas de Validação (sem alterações) ---
 const individualSchema = z.object({
   nome: z.string().min(3, "Nome completo é obrigatório"),
   email: z.string().email("E-mail inválido"),
@@ -51,13 +50,12 @@ const criarConjuntaSchema = (numJogadoras) =>
     emailResponsavel: z.string().email("E-mail do responsável inválido"),
     membros: z
       .array(jogadoraSchema)
-      .min(1, "É necessário inscrever pelo menos uma jogadora.") // Garante que o array não esteja vazio
+      .min(1, "É necessário inscrever pelo menos uma jogadora.")
       .length(
         numJogadoras,
         `O time deve ter exatamente ${numJogadoras} jogadoras.`,
       ),
   });
-// --- Fim dos Schemas ---
 
 function InscricaoEncontro() {
   const { id } = useParams();
@@ -76,11 +74,8 @@ function InscricaoEncontro() {
 
   const isIndividual = tipoInscricao === "individual";
 
-  // --- CORREÇÃO PRINCIPAL AQUI ---
-  // A validação agora é dinâmica baseada no estado 'encontro' e 'tipoInscricao'
   const currentSchema = useMemo(() => {
     if (!encontro) {
-      // Retorna um schema base enquanto os dados do encontro estão carregando
       return individualSchema;
     }
     return isIndividual
@@ -96,7 +91,7 @@ function InscricaoEncontro() {
     reset,
     setValue,
   } = useForm({
-    resolver: zodResolver(currentSchema), // O resolver agora usa o schema dinâmico
+    resolver: zodResolver(currentSchema),
     defaultValues: useMemo(() => {
       return isIndividual
         ? {}
@@ -139,7 +134,6 @@ function InscricaoEncontro() {
     fetchEncontroData();
   }, [id, navigate]);
 
-  // Efeito para resetar o formulário quando o tipo de inscrição muda
   useEffect(() => {
     const defaultMembers = Array(encontro?.jogadorasPorTime || 0).fill({
       nome: "",
@@ -255,47 +249,50 @@ function InscricaoEncontro() {
             className="mt-12 flex w-full flex-col gap-10"
           >
             {isIndividual ? (
-              <div className="flex flex-col gap-5">
-                <Input
-                  label="Seu Nome Completo"
-                  type="text"
-                  register={register("nome")}
-                  error={errors.nome}
-                />
-                <Input
-                  label="Seu E-mail"
-                  type="email"
-                  register={register("email")}
-                  error={errors.email}
-                />
-                <Input
-                  label="Seu CPF"
-                  type="text"
-                  placeholder="123.456.789-00"
-                  register={register("cpf")}
-                  error={errors.cpf}
-                />
-                <Input
-                  label="Seu Telefone"
-                  type="tel"
-                  placeholder="(11) 98765-4321"
-                  register={register("telefone")}
-                  error={errors.telefone}
-                />
-                <Input
-                  label="Sua Data de Nascimento"
-                  type="text"
-                  placeholder="DD/MM/AAAA"
-                  register={register("dataNascimento")}
-                  error={errors.dataNascimento}
-                />
-              </div>
+              <fieldset>
+                <legend className="sr-only">Formulário de Inscrição Individual</legend>
+                <div className="flex flex-col gap-5">
+                  <Input
+                    label="Seu Nome Completo"
+                    type="text"
+                    register={register("nome")}
+                    error={errors.nome}
+                  />
+                  <Input
+                    label="Seu E-mail"
+                    type="email"
+                    register={register("email")}
+                    error={errors.email}
+                  />
+                  <Input
+                    label="Seu CPF"
+                    type="text"
+                    placeholder="123.456.789-00"
+                    register={register("cpf")}
+                    error={errors.cpf}
+                  />
+                  <Input
+                    label="Seu Telefone"
+                    type="tel"
+                    placeholder="(11) 98765-4321"
+                    register={register("telefone")}
+                    error={errors.telefone}
+                  />
+                  <Input
+                    label="Sua Data de Nascimento"
+                    type="text"
+                    placeholder="DD/MM/AAAA"
+                    register={register("dataNascimento")}
+                    error={errors.dataNascimento}
+                  />
+                </div>
+              </fieldset>
             ) : (
               <div className="flex flex-col gap-8">
-                <div>
-                  <h3 className="mb-4 border-b-2 border-[#BA1B31] pb-2 text-2xl font-bold">
+                <fieldset>
+                  <legend className="mb-4 border-b-2 border-[#BA1B31] pb-2 text-2xl font-bold">
                     Dados do Time
-                  </h3>
+                  </legend>
                   <div className="grid gap-5 md:grid-cols-2">
                     <Input
                       label="Nome do Time"
@@ -316,12 +313,12 @@ function InscricaoEncontro() {
                       error={errors.emailResponsavel}
                     />
                   </div>
-                </div>
+                </fieldset>
 
-                <div>
-                  <h3 className="mb-4 border-b-2 border-[#BA1B31] pb-2 text-2xl font-bold">
+                <fieldset>
+                  <legend className="mb-4 border-b-2 border-[#BA1B31] pb-2 text-2xl font-bold">
                     Dados das Jogadoras ({encontro?.jogadorasPorTime} jogadoras)
-                  </h3>
+                  </legend>
                   <div className="flex flex-col gap-8">
                     {fields.map((field, index) => (
                       <div
@@ -371,7 +368,7 @@ function InscricaoEncontro() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </fieldset>
               </div>
             )}
 
