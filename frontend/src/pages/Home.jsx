@@ -8,6 +8,7 @@ import Liga from "../components/placares/Liga";
 import GrupoNoticias from "../components/noticias/GrupoNoticias";
 import SobreSecoes from "../components/home/SobreSecoes";
 import Faq from "../components/home/Faq";
+import Loading from "../components/utils/Loading";
 
 import { getEncontros } from "../services/EncontroService";
 
@@ -42,7 +43,7 @@ function Home() {
   };
 
   return (
-    <div className="relative flex flex-col items-center pt-16 lg:pt-20">
+    <div className="relative mt-16 flex flex-col items-center lg:mt-20">
       <section className="relative -z-999 h-[85lvh] w-full overflow-hidden">
         <video
           autoPlay
@@ -88,10 +89,13 @@ function Home() {
               txt="Jogue com a gente! Gratuito e para todas."
             />
 
-            <div className="relative mt-4 flex w-full flex-col gap-4">
-              <div className="flex gap-3 overflow-x-auto pb-4">
-                {loading ? (
-                  <p>Carregando encontros...</p>
+            <div className="relative mt-4 flex w-full flex-col items-center gap-4">
+              <div className="w-full flex gap-3 overflow-x-auto pb-4">
+                {loading && (
+                  <Loading cor="#BA1B31" txt="Buscando encontros..." />
+                )}
+                {!loading && encontros.length === 0 ? (
+                  <p>Não há encontros ativos.</p>
                 ) : (
                   encontros.map((encontroItem, index) => {
                     const vagasOcupadas = calcularVagasOcupadas(encontroItem);

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getEncontroById } from "../../services/EncontroService";
 import { ArrowLeft } from "lucide-react";
+import { OrbitProgress } from "react-loading-indicators";
 
 import Banner from "../../components/home/Banner";
 import FaixaRoxa from "../../assets/sections/faixa-roxa.webp";
@@ -47,14 +48,19 @@ const EncontroDetalhes = () => {
     return listaAchatada;
   }, [encontro]);
 
-  if (loading) {
-    return (
-      <p className="mt-40 text-center">Carregando detalhes do encontro...</p>
-    );
-  }
+  const verifyLoading = () => {
+    if (loading) {
+      return <Loading cor="#981FBA" txt="Carregando detalhes do encontro..." />;
+    }
+  };
 
   if (!encontro) {
-    return <p className="mt-40 text-center">Encontro não encontrado.</p>;
+    return (
+      <div className="mt-16 lg:mt-40 py-4">
+        <h1 className="text-center font-black text-5xl">Ops!</h1>
+        <p className="text-center mt-2.5">Encontro não encontrado.</p>
+      </div>
+    );
   }
 
   const vagasOcupadas = todosOsParticipantes.length;
@@ -79,22 +85,35 @@ const EncontroDetalhes = () => {
 
         <div>
           <h2 className="mb-4 text-2xl font-bold">Lista de Participantes</h2>
-          {todosOsParticipantes.length === 0 ? (
-            <p>Ainda não há inscritos para este encontro.</p>
+          {verifyLoading()}
+          {!loading && todosOsParticipantes.length === 0 ? (
+            <p>Não há pessoas cadastradas neste evento.</p>
           ) : (
-            <div className="overflow-x-auto rounded-lg border shadow-sm">
+            <div className="overflow-x-auto rounded-lg border border-b-0 shadow-sm">
               <table className="min-w-full bg-white text-sm">
-                <caption className="sr-only">Lista de participantes inscritos no encontro</caption>
+                <caption className="sr-only">
+                  Lista de participantes inscritos no encontro
+                </caption>
                 <thead className="bg-gray-100">
                   <tr>
                     <th scope="col" className="px-4 py-2 text-left">
                       Nome do Participante
                     </th>
-                    <th scope="col" className="px-4 py-2 text-left">Email</th>
-                    <th scope="col" className="px-4 py-2 text-left">CPF</th>
-                    <th scope="col" className="px-4 py-2 text-left">Telefone</th>
-                    <th scope="col" className="px-4 py-2 text-left">Nascimento</th>
-                    <th scope="col" className="px-4 py-2 text-left">Time / Inscrição</th>
+                    <th scope="col" className="px-4 py-2 text-left">
+                      Email
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left">
+                      CPF
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left">
+                      Telefone
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left">
+                      Nascimento
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left">
+                      Time / Inscrição
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getEncontros } from "../../services/EncontroService";
+import Loading from "../../components/utils/Loading";
+
 import Faixa from "../../components/noticias/Faixa";
 import FaixaRoxa from "../../assets/sections/banner-roxo.webp";
 
@@ -28,9 +30,13 @@ const AdminDashboard = () => {
     }, 0);
   };
 
-  if (loading) {
-    return <p className="mt-40 text-center">Carregando encontros...</p>;
-  }
+  const verifyLoading = () => {
+    if (loading) {
+      return (
+        <Loading cor="#981FBA" txt="Buscando encontros..." />
+      );
+    }
+  };
 
   return (
     <div className="flex w-full flex-col items-center py-26 lg:py-30">
@@ -42,6 +48,8 @@ const AdminDashboard = () => {
             Gerenciamento de Encontros
           </h2>
           <ul className="space-y-4">
+            {verifyLoading()}
+            {loading || encontros.length === 0 && <p>Não há encontros cadastrados.</p>}
             {encontros.map((encontro) => {
               const vagasOcupadas = calcularVagasOcupadas(encontro);
               return (

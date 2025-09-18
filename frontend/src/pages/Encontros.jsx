@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { getEncontros } from "../services/EncontroService";
+import Loading from "../components/utils/Loading"
+
 import Banner from "../components/home/Banner";
 import Encontro from "../components/home/Encontro";
 import SobreSecoes from "../components/home/SobreSecoes";
-import { useAuth } from "../context/AuthContext";
 import FaixaVermelha from "../assets/sections/faixa-vermelha.webp";
 
 function Encontros() {
@@ -15,10 +18,7 @@ function Encontros() {
     const fetchEncontros = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}api/encontros`,
-        );
-        const data = await response.json();
+        const data = await getEncontros();
         setEncontros(data);
       } catch (error) {
         console.error("Erro ao buscar encontros:", error);
@@ -60,7 +60,7 @@ function Encontros() {
 
           <div className="relative mt-4 flex w-full flex-col gap-4 md:grid md:grid-cols-2">
             {loading ? (
-              <p>Carregando encontros...</p>
+              <Loading cor="#BA1B31" txt="Buscando encontros..." />
             ) : (
               encontros.map((encontroItem, index) => {
                 const vagasOcupadas = calcularVagasOcupadas(encontroItem);

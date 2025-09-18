@@ -10,6 +10,12 @@ const AvisoModal = ({ isOpen, onClose, title, children, imageUrl }) => {
       mainContent?.removeAttribute("aria-hidden");
     }
 
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
     return () => {
       mainContent?.removeAttribute("aria-hidden");
     };
@@ -29,7 +35,7 @@ const AvisoModal = ({ isOpen, onClose, title, children, imageUrl }) => {
       onClick={onClose}
     >
       <span
-        className={`opacity-50 absolute inset-0 h-dvh bg-black transition-opacity duration-300 ease-in-out`}
+        className={`absolute inset-0 h-dvh bg-black opacity-50 transition-opacity duration-300 ease-in-out`}
       ></span>
       <div
         role="dialog"
@@ -46,18 +52,18 @@ const AvisoModal = ({ isOpen, onClose, title, children, imageUrl }) => {
           <X className="size-6" />
         </button>
 
-        <h2 id="aviso-modal-title" className="text-2xl font-bold text-gray-800">{title}</h2>
+        <h2 id="aviso-modal-title" className="text-2xl font-bold text-gray-800">
+          {title}
+        </h2>
 
-        <div className="text-gray-600">
-          {children}
-        </div>
+        <div className="text-gray-600">{children}</div>
 
         {imageUrl && (
           <div className="mt-4">
             <img
               src={imageUrl}
               alt="QrCode"
-              className="w-full h-auto max-h-60 object-contain rounded"
+              className="h-auto max-h-60 w-full rounded object-contain"
             />
           </div>
         )}

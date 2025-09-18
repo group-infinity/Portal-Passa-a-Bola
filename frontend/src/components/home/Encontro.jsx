@@ -8,25 +8,25 @@ function Encontro({ id, nome, diaI, diaF, encontro, atual, vagas, isFull }) {
     >
       <h3 className="!text-2xl font-bold uppercase">{nome}</h3>
       <div className="w-full flex-col">
-        <div className="flex justify-between">
-          <div className="flex items-center justify-center py-2">
-            <p>
+        <div className="flex justify-around">
+          <div className="flex flex-col items-center justify-center py-2">
               <strong>Data: </strong>
+            <p>
               {diaI}
             </p>
           </div>
 
-          <div className="flex items-center justify-center py-2">
-            <p>
+          <div className="flex flex-col items-center justify-center py-2">
               <strong>Inscrições até: </strong>
+            <p>
               {diaF}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center py-2">
+        <div className="flex flex-col items-center py-2">
+            <strong>Vagas restantes: </strong>
           <p>
-            <strong>Vagas: </strong>
             {`${atual}/${vagas}`}
           </p>
         </div>
