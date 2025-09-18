@@ -14,6 +14,10 @@ export const login = (req, res) => {
 
   if (email === ADMIN_USER.email && senha === ADMIN_USER.senha) {
 
+    if(!process.env.JWT_SECRET){
+      console.error("Token não cadastrado")
+    }
+
     const token = jwt.sign(
       { id: ADMIN_USER.id, role: ADMIN_USER.role },
       process.env.JWT_SECRET,
