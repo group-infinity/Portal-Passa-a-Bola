@@ -6,8 +6,6 @@ import { z } from "zod";
 import { getEncontroById, createInscricao } from "../services/EncontroService";
 import { gerarDadosJogadora } from "../components/utils/faker";
 
-import FaixaVermelha from "../assets/sections/banner-verm.webp";
-
 import Faixa from "../components/noticias/Faixa";
 import Input from "../components/cadastro/Input";
 import Botao from "../components/cadastro/Botao";
@@ -218,7 +216,7 @@ function InscricaoEncontro() {
 
       <div className="mt-16 flex w-full flex-col items-center py-16 lg:py-30">
         <div className="w-full px-6 md:max-w-[80%] lg:max-w-[60%]">
-          <Faixa txt={`Inscrição: ${encontro?.nome}`} bg={FaixaVermelha} />
+          <Faixa txt={`Inscrição: ${encontro?.nome}`} bg={"/images/sections/banner-verm.webp"} />
 
           <div className="my-8 flex items-center justify-center gap-8">
             <div className="flex justify-center gap-4">

@@ -1,8 +1,5 @@
 import Noticia from "./Noticia";
 
-import Imagem from "/noticias/santos.webp";
-import Favicon from "/noticias/favicon.webp";
-
 function GrupoNoticias() {
   const dados = {
     noticias: [
@@ -10,40 +7,40 @@ function GrupoNoticias() {
         id: 1,
         fonte: {
           nome: "Antenados no Futebol",
-          logoUrl: Favicon,
+          logoUrl: "/images/noticias/favicon.webp",
         },
         titulo:
           "Com título do Santos, Brasileirão Feminino A2 se encerra com acesso de Botafogo, Atlético-MG e Fortaleza",
         resumo:
           "Santos e Botafogo se enfrentaram na Vila Belmiro na tarde deste sábado (30), com a equipe santista ficando com a taça após empate de 1 a 1.",
         tempoPublicacao: "1 dia atrás",
-        imagemUrl: Imagem,
+        imagemUrl: "/images/noticias/santos.webp",
       },
       {
         id: 2,
         fonte: {
           nome: "Antenados no Futebol",
-          logoUrl: Favicon,
+          logoUrl: "/images/noticias/favicon.webp",
         },
         titulo:
           "Com título do Santos, Brasileirão Feminino A2 se encerra com acesso de Botafogo, Atlético-MG e Fortaleza",
         resumo:
           "Santos e Botafogo se enfrentaram na Vila Belmiro na tarde deste sábado (30), com a equipe santista ficando com a taça após empate de 1 a 1.",
         tempoPublicacao: "1 dia atrás",
-        imagemUrl: Imagem,
+        imagemUrl: "/images/noticias/santos.webp",
       },
       {
         id: 3,
         fonte: {
           nome: "Antenados no Futebol",
-          logoUrl: Favicon,
+          logoUrl: "/images/noticias/favicon.webp",
         },
         titulo:
           "Com título do Santos, Brasileirão Feminino A2 se encerra com acesso de Botafogo, Atlético-MG e Fortaleza",
         resumo:
           "Santos e Botafogo se enfrentaram na Vila Belmiro na tarde deste sábado (30), com a equipe santista ficando com a taça após empate de 1 a 1.",
         tempoPublicacao: "1 dia atrás",
-        imagemUrl: Imagem,
+        imagemUrl: "/images/noticias/santos.webp",
       },
     ],
   };

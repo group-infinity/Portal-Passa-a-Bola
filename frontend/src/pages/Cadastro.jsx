@@ -4,10 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import Input from "../components/cadastro/Input";
-import Faixa from "../components/noticias/Faixa";
 import Botao from "../components/cadastro/Botao";
+import Faixa from "../components/noticias/Faixa";
 
-import Banner from "../assets/sections/banner-roxo.webp";
 
 const cadastroSchema = z
   .object({
@@ -59,7 +58,7 @@ const Cadastro = () => {
   return (
     <div className="flex w-full flex-col items-center py-16 lg:py-30">
       <div className="w-full px-6 pt-6 lg:max-w-[45%]">
-        <Faixa txt={"cadastro"} bg={Banner} />
+        <Faixa txt={"cadastro"} bg={"/images/sections/banner-roxo.webp"} />
 
         <form
           onSubmit={handleSubmit(handleCadastro)}

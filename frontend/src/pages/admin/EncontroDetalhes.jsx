@@ -5,7 +5,6 @@ import { ArrowLeft } from "lucide-react";
 import { OrbitProgress } from "react-loading-indicators";
 
 import Banner from "../../components/home/Banner";
-import FaixaRoxa from "../../assets/sections/faixa-roxa.webp";
 
 const EncontroDetalhes = () => {
   const { id } = useParams();
@@ -67,7 +66,7 @@ const EncontroDetalhes = () => {
 
   return (
     <div className="relative flex flex-col items-center pt-26 lg:pt-30">
-      <Banner img={FaixaRoxa} cor={"#981FBA"} txt={encontro.nome} />
+      <Banner img={"/images/sections/faixa-roxa.webp"} cor={"#981FBA"} txt={encontro.nome} />
       <div className="relative -top-5 mx-auto w-full p-6 md:max-w-[80%] lg:max-w-[70%]">
         <div className="mb-8 rounded-lg border bg-gray-50 p-4 shadow-md">
           <h2 className="mb-2 text-2xl font-bold">Resumo do Encontro</h2>

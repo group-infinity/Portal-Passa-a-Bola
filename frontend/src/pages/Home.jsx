@@ -12,11 +12,6 @@ import Loading from "../components/utils/Loading";
 
 import { getEncontros } from "../services/EncontroService";
 
-import Logo from "../assets/logoPb.webp";
-import FaixaVerde from "../assets/sections/faixa-verde.webp";
-import FaixaVermelha from "../assets/sections/faixa-vermelha.webp";
-import FaixaRoxa from "../assets/sections/faixa-roxa.webp";
-
 function Home() {
   const [encontros, setEncontros] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +53,7 @@ function Home() {
         <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/100 via-transparent to-black/100"></div>
 
         <div className="relative z-30 inline-grid h-full w-full p-6">
-          <div className="w-full self-start text-white md:max-w-1/2">
+          <div className="w-full self-start text-white md:max-w-3/4">
             <h1 className="font-[Anton] text-4xl md:text-6xl">
               A <span className="text-[#981FBA] lg:text-7xl"> CASA </span> DO
               FUTEBOL FEMININO!
@@ -69,7 +64,7 @@ function Home() {
             </p>
           </div>
           <img
-            src={Logo}
+            src="/images/logos/logoPb.webp"
             alt="Logo do Passa a Bola"
             className="h-15 w-15 self-end justify-self-center opacity-70"
           />
@@ -79,7 +74,7 @@ function Home() {
       <div className="flex w-full flex-col items-center gap-4">
         <section className="h-fit w-full">
           <Banner
-            img={FaixaVermelha}
+            img={"/images/sections/faixa-vermelha.webp"}
             cor={"#BA1B31"}
             txt={"próximos encontros"}
           />
@@ -89,8 +84,8 @@ function Home() {
               txt="Jogue com a gente! Gratuito e para todas."
             />
 
-            <div className="relative mt-4 flex w-full flex-col items-center gap-4">
-              <div className="w-full flex gap-3 overflow-x-auto pb-4">
+            <div className="relative mt-4 flex w-full flex-col gap-4">
+              <div className="w-full flex justify-center gap-3 overflow-x-auto pb-4">
                 {loading && (
                   <Loading cor="#BA1B31" txt="Buscando encontros..." />
                 )}
@@ -141,7 +136,7 @@ function Home() {
 
         <section className="h-fit w-full">
           <Banner
-            img={FaixaVerde}
+            img={"/images/sections/faixa-verde.webp"}
             cor={"#6EAA38"}
             txt={"placares e notícias"}
           />
@@ -190,7 +185,7 @@ function Home() {
 
         <section className="h-fit w-full">
           <Banner
-            img={FaixaRoxa}
+            img={"/images/sections/faixa-roxa.webp"}
             cor={"#981FBA"}
             txt={"perguntas frequentes"}
           />

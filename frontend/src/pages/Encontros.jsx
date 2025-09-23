@@ -7,7 +7,6 @@ import Loading from "../components/utils/Loading"
 import Banner from "../components/home/Banner";
 import Encontro from "../components/home/Encontro";
 import SobreSecoes from "../components/home/SobreSecoes";
-import FaixaVermelha from "../assets/sections/faixa-vermelha.webp";
 
 function Encontros() {
   const { isAdmin } = useAuth();
@@ -39,7 +38,7 @@ function Encontros() {
     <div className="relative flex flex-col items-center pt-26 lg:pt-30">
       <section className="h-fit w-full">
         <Banner
-          img={FaixaVermelha}
+          img={"/images/sections/faixa-vermelha.webp"}
           cor={"#BA1B31"}
           txt={"próximos encontros"}
         />

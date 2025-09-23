@@ -1,17 +1,10 @@
 import Banner from "../components/home/Banner";
-import FaixaRoxa from "../assets/sections/faixa-roxa.webp";
-import Logo from "../assets/logoPb.webp";
 
 function Sobre() {
   return (
     <div className="relative flex flex-col items-center pt-26 lg:pt-30">
-      <Banner img={FaixaRoxa} cor={"#981FBA"} txt={"Sobre Nós"} />
+      <Banner img={"/images/sections/faixa-roxa.webp"} cor={"#981FBA"} txt={"Sobre Nós"} />
       <div className="relative -top-5 mx-auto flex w-full flex-col items-center gap-6 p-6 md:max-w-[80%] lg:max-w-[70%]">
-        {/* <img
-          src={Logo}
-          alt="Logo do Passa a Bola"
-          className="h-20 w-20 opacity-70"
-        /> */}
         <p className="text-center text-lg leading-relaxed">
           O <strong>PASSA A BOLA</strong> é uma marca influente e{" "}
           <strong>

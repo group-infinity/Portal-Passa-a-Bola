@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { SunDim, X, CircleUserRound, Menu, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Logo from "../assets/logo.webp";
 
 function Navbar() {
   const { user, isAdmin, logout } = useAuth();
@@ -20,7 +19,7 @@ function Navbar() {
     <header className="fixed z-50 flex h-16 w-screen items-center justify-between bg-[#981FBA] px-6 py-2.5 lg:h-20">
       <div className="flex gap-1">
         <Link to="/" aria-label="Página inicial do Passa a Bola">
-          <img src={Logo} alt="Logo do Passa a Bola" className="h-11" />
+          <img src={"/images/logos/logo.webp"} alt="Logo do Passa a Bola" className="h-11" />
         </Link>
       </div>
 
@@ -113,7 +112,12 @@ function Navbar() {
                 </li>
                 <li>
                   <Link to="/placares" onClick={() => setAtivo(false)}>
-                    Placares e Notícias
+                    Placares
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/noticias" onClick={() => setAtivo(false)}>
+                    Notícias
                   </Link>
                 </li>
                 <li>

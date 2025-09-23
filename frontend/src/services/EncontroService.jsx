@@ -36,3 +36,19 @@ export const createInscricao = async (id, inscricaoData) => {
     if (!response.ok) throw new Error(result.error || "Erro ao realizar inscrição.");
     return result;
 };
+
+export const deleteEncontro = async (id, token) => {
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const result = await response.json();
+    throw new Error(result.error || 'Falha ao deletar o encontro.');
+  }
+
+  return await response.json();
+};

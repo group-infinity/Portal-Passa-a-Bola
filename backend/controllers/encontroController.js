@@ -1,113 +1,182 @@
-let encontros = [
-  { id: 1, nome: "Encontro nº1", diaI: "27/10/2025", diaF: "30/10/2025", totalVagas: 44, jogadorasPorTime: 11, inscricoes: [] },
-  { id: 2, nome: "Encontro nº2", diaI: "10/11/2025", diaF: "13/11/2025", totalVagas: 20, jogadorasPorTime: 5, inscricoes: [] },
-];
-let nextId = 3;
+import { sql } from "@vercel/postgres";
 
-export const getAllEncontros = (req, res) => {
-  res.setHeader('Cache-Control', 'no-store, max-age=0');
-  res.json(encontros);
-};
+export const getAllEncontros = async (req, res) => {
+  try {
+    const { rows } = await sql`
+      SELECT
+        e.id, e.nome, e."diaI", e."diaF", e."totalVagas", e."jogadorasPorTime",
+        i.id as inscricao_id, i.tipo, i.membros
+      FROM encontros e
+      LEFT JOIN inscricoes i ON e.id = i.encontro_id
+      ORDER BY e.id ASC;
+    `;
 
-export const getEncontroById = (req, res) => {
-  res.setHeader('Cache-Control', 'no-store, max-age=0');
-  const encontro = encontros.find(e => e.id === parseInt(req.params.id));
-  if (encontro) {
-    res.json(encontro);
-  } else {
-    res.status(404).json({ error: "Encontro não encontrado." });
+    const encontrosMap = new Map();
+    rows.forEach((row) => {
+      if (!encontrosMap.has(row.id)) {
+        encontrosMap.set(row.id, {
+          id: row.id,
+          nome: row.nome,
+          diaI: row.diaI,
+          diaF: row.diaF,
+          totalVagas: row.totalVagas,
+          jogadorasPorTime: row.jogadorasPorTime,
+          inscricoes: [],
+        });
+      }
+
+      if (row.inscricao_id) {
+        encontrosMap.get(row.id).inscricoes.push({
+          id: row.inscricao_id,
+          tipo: row.tipo,
+          membros: row.membros || [],
+        });
+      }
+    });
+
+    const encontros = Array.from(encontrosMap.values());
+
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+    res.json(encontros);
+  } catch (error) {
+    console.error("Erro ao buscar encontros:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
   }
 };
 
+export const getEncontroById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { rows: encontros } = await sql`SELECT id, nome, "diaI", "diaF", "totalVagas", "jogadorasPorTime" FROM encontros WHERE id = ${id}`;
 
-export const createEncontro = (req, res) => {
+    if (encontros.length === 0) {
+      return res.status(404).json({ error: "Encontro não encontrado." });
+    }
+
+    const encontro = encontros[0];
+    const { rows: inscricoes } = await sql`SELECT * FROM inscricoes WHERE encontro_id = ${id}`;
+    encontro.inscricoes = inscricoes;
+
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+    res.json(encontro);
+  } catch (error) {
+    console.error("Erro ao buscar encontro:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
+  }
+};
+
+export const createEncontro = async (req, res) => {
   const { nome, diaI, diaF, totalVagas, jogadorasPorTime } = req.body;
 
   if (!nome || !diaI || !diaF || !totalVagas || !jogadorasPorTime) {
     return res.status(400).json({ error: "Todos os campos são obrigatórios." });
   }
 
-  const numVagas = parseInt(totalVagas);
-  const numJogadoras = parseInt(jogadorasPorTime);
-
-  if (numVagas % numJogadoras !== 0) {
-    return res.status(400).json({ error: `O total de vagas (${numVagas}) não é divisível pelo tamanho do time (${numJogadoras}).` });
+  try {
+    const { rows } = await sql`
+      INSERT INTO encontros (nome, "diaI", "diaF", "totalVagas", "jogadorasPorTime")
+      VALUES (${nome}, ${diaI}, ${diaF}, ${totalVagas}, ${jogadorasPorTime})
+      RETURNING *
+    `;
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error("Erro ao criar encontro:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
   }
-
-  const numeroDeTimes = numVagas / numJogadoras;
-
-  if (numeroDeTimes % 2 !== 0) {
-    return res.status(400).json({ error: `A combinação de vagas e tamanho do time resulta em um número ímpar de times (${numeroDeTimes}). O número de times deve ser par.` });
-  }
-
-  const newEncontro = {
-    id: nextId++,
-    nome,
-    diaI,
-    diaF,
-    totalVagas: numVagas,
-    jogadorasPorTime: numJogadoras,
-    inscricoes: [],
-  };
-  encontros.push(newEncontro);
-  console.log("Novo encontro criado:", newEncontro);
-  res.status(201).json(newEncontro);
 };
 
-export const createInscricao = (req, res) => {
-  const encontro = encontros.find(e => e.id === parseInt(req.params.id));
-  if (!encontro) {
-    return res.status(404).json({ error: "Encontro não encontrado." });
-  }
 
-  const emailsInscritos = new Set();
-  const cpfsInscritos = new Set();
-  encontro.inscricoes.forEach(insc => {
-    if (insc.tipo === 'individual') {
-      emailsInscritos.add(insc.email);
-      cpfsInscritos.add(insc.cpf);
-    } else if (insc.tipo === 'conjunta') {
-      insc.membros.forEach(membro => {
-        emailsInscritos.add(membro.email);
-        cpfsInscritos.add(membro.cpf);
+export const createInscricao = async (req, res) => {
+  const { id: encontro_id } = req.params;
+  const { tipo, ...dados } = req.body;
+
+  try {
+    const { rows: encontros } = await sql`SELECT "totalVagas", "jogadorasPorTime" FROM encontros WHERE id = ${encontro_id}`;
+    if (encontros.length === 0) {
+      return res.status(404).json({ error: "Encontro não encontrado." });
+    }
+    const { totalVagas, jogadorasPorTime } = encontros[0];
+
+    const { rows: inscricoesAnteriores } = await sql`SELECT tipo, membros FROM inscricoes WHERE encontro_id = ${encontro_id}`;
+    let vagasOcupadas = 0;
+    inscricoesAnteriores.forEach((insc) => {
+      vagasOcupadas += insc.tipo === "individual" ? 1 : insc.membros?.length || 0;
+    });
+
+    const vagasNecessarias = tipo === "individual" ? 1 : dados.membros.length;
+    if (vagasOcupadas + vagasNecessarias > totalVagas) {
+      return res.status(400).json({ error: "Inscrições esgotadas para este encontro!" });
+    }
+
+    let emailsParaVerificar = [];
+    let cpfsParaVerificar = [];
+
+    if (tipo === "individual") {
+      emailsParaVerificar.push(dados.email);
+      cpfsParaVerificar.push(dados.cpf);
+    } else if (tipo === "conjunta") {
+      const { rows: timeExistente } = await sql`SELECT id FROM inscricoes WHERE encontro_id = ${encontro_id} AND "nomeTime" ILIKE ${dados.nomeTime}`;
+      if (timeExistente.length > 0) {
+        return res.status(400).json({ error: `O nome de time '${dados.nomeTime}' já está em uso neste encontro.` });
+      }
+      emailsParaVerificar.push(dados.emailResponsavel);
+
+      dados.membros.forEach((membro) => {
+        emailsParaVerificar.push(membro.email);
+        cpfsParaVerificar.push(membro.cpf);
       });
     }
-  });
 
-  const novaInscricaoData = req.body;
+    if (emailsParaVerificar.length > 0) {
+      const { rows: duplicatas } = await sql`
+                SELECT email, cpf FROM inscricoes
+                WHERE encontro_id = ${encontro_id} AND (email = ANY(${emailsParaVerificar}) OR cpf = ANY(${cpfsParaVerificar}))
+            `;
 
-  const vagasOcupadas = cpfsInscritos.size;
-  const vagasRestantes = encontro.totalVagas - vagasOcupadas;
+      if (duplicatas.length > 0) {
+        const dup = duplicatas[0];
+        const emailDuplicado = emailsParaVerificar.includes(dup.email);
+        if (emailDuplicado) {
+          return res.status(400).json({ error: `O email '${dup.email}' já está inscrito neste encontro.` });
+        }
+        return res.status(400).json({ error: `O CPF '${dup.cpf}' já está inscrito neste encontro.` });
+      }
+    }
 
-  if (novaInscricaoData.tipo === 'individual') {
-    if (vagasRestantes < 1) {
-      return res.status(400).json({ error: "Não há mais vagas disponíveis." });
+    if (tipo === "individual") {
+      const { nome, email, cpf, telefone, dataNascimento } = dados;
+      await sql`
+                INSERT INTO inscricoes (encontro_id, tipo, nome, email, cpf, telefone, "dataNascimento")
+                VALUES (${encontro_id}, ${tipo}, ${nome}, ${email}, ${cpf}, ${telefone}, ${dataNascimento})
+            `;
+    } else if (tipo === "conjunta") {
+      const { nomeTime, responsavel, emailResponsavel, membros } = dados;
+      await sql`
+                INSERT INTO inscricoes (encontro_id, tipo, "nomeTime", nome, email, membros)
+                VALUES (${encontro_id}, ${tipo}, ${nomeTime}, ${responsavel}, ${emailResponsavel}, ${JSON.stringify(membros)})
+            `;
     }
-  } else if (novaInscricaoData.tipo === 'conjunta') {
-    if (novaInscricaoData.membros.length !== encontro.jogadorasPorTime) {
-        return res.status(400).json({ error: `Este encontro exige times de ${encontro.jogadorasPorTime} jogadoras.` });
-    }
-    if (vagasRestantes < encontro.jogadorasPorTime) {
-      return res.status(400).json({ error: `Não há vagas suficientes para um time completo. Vagas restantes: ${vagasRestantes}.` });
-    }
+
+    res.status(201).json({ message: "Inscrição realizada com sucesso!" });
+  } catch (error) {
+    console.error(`Erro ao realizar inscrição:`, error);
+    res.status(500).json({ error: "Ocorreu um erro inesperado. Tente novamente." });
   }
+};
 
-  if (novaInscricaoData.tipo === 'conjunta') {
-    const nomeTimeJaExiste = encontro.inscricoes.some(insc => insc.tipo === 'conjunta' && insc.nomeTime.toLowerCase() === novaInscricaoData.nomeTime.toLowerCase());
-    if (nomeTimeJaExiste) {
-      return res.status(400).json({ error: `O nome de time '${novaInscricaoData.nomeTime}' já está em uso.` });
+export const deleteEncontro = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deleteResult = await sql`DELETE FROM encontros WHERE id = ${id}`;
+
+    if (deleteResult.rowCount === 0) {
+      return res.status(404).json({ error: 'Encontro não encontrado para exclusão.' });
     }
-    for (const membro of novaInscricaoData.membros) {
-      if (emailsInscritos.has(membro.email)) return res.status(400).json({ error: `O e-mail '${membro.email}' já foi inscrito.` });
-      if (cpfsInscritos.has(membro.cpf)) return res.status(400).json({ error: `O CPF '${membro.cpf}' já foi inscrito.` });
-    }
-  } else if (novaInscricaoData.tipo === 'individual') {
-    if (emailsInscritos.has(novaInscricaoData.email)) return res.status(400).json({ error: `O e-mail '${novaInscricaoData.email}' já foi inscrito.` });
-    if (cpfsInscritos.has(novaInscricaoData.cpf)) return res.status(400).json({ error: `O CPF '${novaInscricaoData.cpf}' já foi inscrito.` });
+
+    res.status(200).json({ message: 'Encontro e todas as suas inscrições foram deletados com sucesso!' });
+  } catch (error) {
+    console.error("Erro ao deletar encontro:", error);
+    res.status(500).json({ error: 'Erro interno do servidor ao tentar deletar o encontro.' });
   }
-
-  const novaInscricao = { id: Date.now(), ...novaInscricaoData };
-  encontro.inscricoes.push(novaInscricao);
-  console.log(`Nova inscrição no encontro ${encontro.id}:`, novaInscricao);
-  res.status(201).json({ message: "Inscrição realizada com sucesso!", inscricao: novaInscricao });
 };

@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import BannerVermelho from "../../assets/sections/banner-verm.webp";
 
 function Encontro({ id, nome, diaI, diaF, encontro, atual, vagas, isFull }) {
   return (
@@ -10,7 +9,7 @@ function Encontro({ id, nome, diaI, diaF, encontro, atual, vagas, isFull }) {
       <div className="w-full flex-col">
         <div className="flex justify-around">
           <div className="flex flex-col items-center justify-center py-2">
-              <strong>Data: </strong>
+              <strong>Data do Encontro: </strong>
             <p>
               {diaI}
             </p>
@@ -35,7 +34,7 @@ function Encontro({ id, nome, diaI, diaF, encontro, atual, vagas, isFull }) {
       {isFull ? (
         <button
           disabled
-          style={{ backgroundImage: `url(${BannerVermelho})` }}
+          style={{ backgroundImage: `url(/images/sections/banner-verm.webp)` }}
           className={`w-full cursor-not-allowed rounded-sm bg-gray-500 bg-cover bg-no-repeat p-3 text-center text-xl font-bold text-white uppercase opacity-60`}
         >
           Inscrições Encerradas
@@ -43,7 +42,7 @@ function Encontro({ id, nome, diaI, diaF, encontro, atual, vagas, isFull }) {
       ) : (
         <Link
           to={`/encontros/${id}/inscrever`}
-          style={{ backgroundImage: `url(${BannerVermelho})` }}
+          style={{ backgroundImage: `url(/images/sections/banner-verm.webp)` }}
           className={`w-full rounded-sm bg-cover bg-no-repeat p-3 text-center text-xl font-bold text-white uppercase`}
         >
           Inscreva-se

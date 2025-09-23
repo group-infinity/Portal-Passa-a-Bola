@@ -6,8 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { createEncontro } from "../../services/EncontroService";
 
-import BannerVermelho from "../../assets/sections/banner-verm.webp";
-
 import Input from "../../components/cadastro/Input";
 import Botao from "../../components/cadastro/Botao";
 import Faixa from "../../components/noticias/Faixa";
@@ -147,7 +145,7 @@ const CriarEncontro = () => {
   return (
     <div className="mt-16 flex w-full flex-col items-center py-16 lg:py-30">
       <div className="w-full px-6 md:max-w-[60%] lg:max-w-[45%]">
-        <Faixa txt={"novo encontro"} bg={BannerVermelho} />
+        <Faixa txt={"novo encontro"} bg={"/images/sections/banner-verm.webp"} />
 
         <form
           onSubmit={handleSubmit(handleCreateEncontro)}
@@ -161,14 +159,14 @@ const CriarEncontro = () => {
               error={errors.nome}
             />
             <Input
-              label="Data de Início"
+              label="Data do Encontro"
               type="date"
               min={getHoje()}
               register={{ ...register("diaI") }}
               error={errors.diaI}
             />
             <Input
-              label="Data de Fim das Inscrições"
+              label="Data de Término das Inscrições"
               type="date"
               min={diaInicioSelecionado || getHoje()}
               register={{ ...register("diaF") }}

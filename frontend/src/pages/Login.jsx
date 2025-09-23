@@ -11,8 +11,6 @@ import Input from "../components/cadastro/Input";
 import Botao from "../components/cadastro/Botao";
 import Faixa from "../components/noticias/Faixa";
 
-import Banner from "../assets/sections/banner-roxo.webp";
-
 const loginSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
   senha: z
@@ -45,7 +43,7 @@ const Login = () => {
   return (
     <div className="mt-16 flex w-full flex-col items-center py-16 lg:py-30">
       <div className="w-full px-6 md:max-w-[60%] lg:max-w-[45%]">
-        <Faixa txt={"login"} bg={Banner} />
+        <Faixa txt={"login"} bg={"/images/sections/banner-roxo.webp"} />
 
         <form
           onSubmit={handleSubmit(handleLogin)}
