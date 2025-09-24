@@ -1,4 +1,6 @@
 import { sql } from "@vercel/postgres";
+import { put } from '@vercel/blob';
+import { v4 as uuidv4 } from 'uuid';
 
 export const getAllEncontros = async (req, res) => {
   try {
@@ -85,81 +87,139 @@ export const createEncontro = async (req, res) => {
   }
 };
 
-
 export const createInscricao = async (req, res) => {
   const { id: encontro_id } = req.params;
-  const { tipo, ...dados } = req.body;
+  const dados = req.body;
+  const tipo = dados.tipo;
+  const files = req.files || [];
 
   try {
     const { rows: encontros } = await sql`SELECT "totalVagas", "jogadorasPorTime" FROM encontros WHERE id = ${encontro_id}`;
     if (encontros.length === 0) {
       return res.status(404).json({ error: "Encontro não encontrado." });
     }
-    const { totalVagas, jogadorasPorTime } = encontros[0];
+    const { totalVagas } = encontros[0];
 
     const { rows: inscricoesAnteriores } = await sql`SELECT tipo, membros FROM inscricoes WHERE encontro_id = ${encontro_id}`;
     let vagasOcupadas = 0;
     inscricoesAnteriores.forEach((insc) => {
-      vagasOcupadas += insc.tipo === "individual" ? 1 : insc.membros?.length || 0;
+      vagasOcupadas += insc.tipo === "individual" ? 1 : (insc.membros || []).length;
     });
 
-    const vagasNecessarias = tipo === "individual" ? 1 : dados.membros.length;
+    const membrosInput = tipo === 'conjunta' ? JSON.parse(dados.membros || '[]') : [];
+    const vagasNecessarias = tipo === "individual" ? 1 : membrosInput.length;
+
     if (vagasOcupadas + vagasNecessarias > totalVagas) {
-      return res.status(400).json({ error: "Inscrições esgotadas para este encontro!" });
+        return res.status(400).json({ error: "Inscrições esgotadas para este encontro!" });
     }
 
     let emailsParaVerificar = [];
-    let cpfsParaVerificar = [];
-
     if (tipo === "individual") {
-      emailsParaVerificar.push(dados.email);
-      cpfsParaVerificar.push(dados.cpf);
+        emailsParaVerificar.push(dados.email);
     } else if (tipo === "conjunta") {
-      const { rows: timeExistente } = await sql`SELECT id FROM inscricoes WHERE encontro_id = ${encontro_id} AND "nomeTime" ILIKE ${dados.nomeTime}`;
-      if (timeExistente.length > 0) {
-        return res.status(400).json({ error: `O nome de time '${dados.nomeTime}' já está em uso neste encontro.` });
-      }
-      emailsParaVerificar.push(dados.emailResponsavel);
-
-      dados.membros.forEach((membro) => {
-        emailsParaVerificar.push(membro.email);
-        cpfsParaVerificar.push(membro.cpf);
-      });
+        emailsParaVerificar.push(dados.emailResponsavel);
+        membrosInput.forEach(membro => emailsParaVerificar.push(membro.email));
     }
-
-    if (emailsParaVerificar.length > 0) {
-      const { rows: duplicatas } = await sql`
-                SELECT email, cpf FROM inscricoes
-                WHERE encontro_id = ${encontro_id} AND (email = ANY(${emailsParaVerificar}) OR cpf = ANY(${cpfsParaVerificar}))
-            `;
-
-      if (duplicatas.length > 0) {
-        const dup = duplicatas[0];
-        const emailDuplicado = emailsParaVerificar.includes(dup.email);
-        if (emailDuplicado) {
-          return res.status(400).json({ error: `O email '${dup.email}' já está inscrito neste encontro.` });
+    const emailsUnicos = [...new Set(emailsParaVerificar.filter(Boolean))];
+    if (emailsUnicos.length > 0) {
+        const { rows: duplicatasEmail } = await sql`
+            SELECT email FROM inscricoes WHERE encontro_id = ${encontro_id} AND email = ANY(${emailsUnicos})
+            UNION
+            SELECT value->>'email' as email FROM inscricoes, jsonb_array_elements(membros) WHERE encontro_id = ${encontro_id} AND value->>'email' = ANY(${emailsUnicos})
+        `;
+        if (duplicatasEmail.length > 0) {
+            return res.status(400).json({ error: `O email '${duplicatasEmail[0].email}' já está inscrito neste encontro.` });
         }
-        return res.status(400).json({ error: `O CPF '${dup.cpf}' já está inscrito neste encontro.` });
-      }
     }
 
+    const uploadFile = async (file) => {
+      if (!file) return null;
+      const blob = await put(`${uuidv4()}-${file.originalname}`, file.buffer, {
+        access: 'public',
+        contentType: file.mimetype,
+      });
+      return blob.url;
+    };
+
     if (tipo === "individual") {
-      const { nome, email, cpf, telefone, dataNascimento } = dados;
+      const { nome, email, cpf, telefone, dataNascimento, posicaoPreferida } = dados;
+      const fotoDocumentoFile = files.find(f => f.fieldname === 'fotoDocumento');
+      const selfiePessoalFile = files.find(f => f.fieldname === 'selfiePessoal');
+
+      const fotoDocumentoUrl = await uploadFile(fotoDocumentoFile);
+      const selfiePessoalUrl = await uploadFile(selfiePessoalFile);
+
       await sql`
-                INSERT INTO inscricoes (encontro_id, tipo, nome, email, cpf, telefone, "dataNascimento")
-                VALUES (${encontro_id}, ${tipo}, ${nome}, ${email}, ${cpf}, ${telefone}, ${dataNascimento})
-            `;
+          INSERT INTO inscricoes (encontro_id, tipo, nome, email, cpf, telefone, "dataNascimento", "posicaoPreferida", "fotoDocumentoUrl", "selfiePessoalUrl")
+          VALUES (${encontro_id}, ${tipo}, ${nome}, ${email}, ${cpf}, ${telefone}, ${dataNascimento}, ${posicaoPreferida}, ${fotoDocumentoUrl}, ${selfiePessoalUrl})
+      `;
     } else if (tipo === "conjunta") {
-      const { nomeTime, responsavel, emailResponsavel, membros } = dados;
+      const { nomeTime, responsavel, emailResponsavel } = dados;
+
+      const membrosMap = new Map();
+
+      Object.keys(dados).forEach(key => {
+        const match = key.match(/^membros\[(\d+)\]\[(\w+)\]$/);
+        if (match) {
+          const index = match[1];
+          const field = match[2];
+          if (!membrosMap.has(index)) membrosMap.set(index, {});
+          membrosMap.get(index)[field] = dados[key];
+        }
+      });
+
+      files.forEach(file => {
+        const match = file.fieldname.match(/^membros\[(\d+)\]\[(\w+)\]$/);
+        if (match) {
+          const index = match[1];
+          const field = match[2];
+          if (membrosMap.has(index)) {
+            membrosMap.get(index)[field] = file;
+          }
+        }
+      });
+
+      const membrosArray = Array.from(membrosMap.values());
+
+      const membrosComUrl = await Promise.all(membrosArray.map(async (membro) => {
+          const fotoDocumentoUrl = await uploadFile(membro.fotoDocumento);
+          const selfiePessoalUrl = await uploadFile(membro.selfiePessoal);
+
+          return {
+              nome: membro.nome,
+              email: membro.email,
+              cpf: membro.cpf,
+              telefone: membro.telefone,
+              dataNascimento: membro.dataNascimento,
+              posicaoPreferida: membro.posicaoPreferida,
+              fotoDocumentoUrl,
+              selfiePessoalUrl
+          };
+      }));
+
       await sql`
-                INSERT INTO inscricoes (encontro_id, tipo, "nomeTime", nome, email, membros)
-                VALUES (${encontro_id}, ${tipo}, ${nomeTime}, ${responsavel}, ${emailResponsavel}, ${JSON.stringify(membros)})
-            `;
+          INSERT INTO inscricoes (encontro_id, tipo, "nomeTime", nome, email, membros)
+          VALUES (
+            ${encontro_id},
+            ${tipo},
+            ${nomeTime},
+            ${responsavel},
+            ${emailResponsavel},
+            ${JSON.stringify(membrosComUrl)}
+          )
+      `;
     }
 
     res.status(201).json({ message: "Inscrição realizada com sucesso!" });
+
   } catch (error) {
     console.error(`Erro ao realizar inscrição:`, error);
+    if (error.code === '23505') {
+      const detail = error.detail || '';
+      const emailMatch = detail.match(/\(([^)]+)\)/);
+      const valorDuplicado = emailMatch ? emailMatch[1].split(', ')[1] : 'um dos valores fornecidos';
+      return res.status(400).json({ error: `O valor '${valorDuplicado}' já está inscrito neste encontro.` });
+    }
     res.status(500).json({ error: "Ocorreu um erro inesperado. Tente novamente." });
   }
 };
@@ -171,12 +231,12 @@ export const deleteEncontro = async (req, res) => {
     const deleteResult = await sql`DELETE FROM encontros WHERE id = ${id}`;
 
     if (deleteResult.rowCount === 0) {
-      return res.status(404).json({ error: 'Encontro não encontrado para exclusão.' });
+      return res.status(404).json({ error: "Encontro não encontrado para exclusão." });
     }
 
-    res.status(200).json({ message: 'Encontro e todas as suas inscrições foram deletados com sucesso!' });
+    res.status(200).json({ message: "Encontro e todas as suas inscrições foram deletados com sucesso!" });
   } catch (error) {
     console.error("Erro ao deletar encontro:", error);
-    res.status(500).json({ error: 'Erro interno do servidor ao tentar deletar o encontro.' });
+    res.status(500).json({ error: "Erro interno do servidor ao tentar deletar o encontro." });
   }
 };

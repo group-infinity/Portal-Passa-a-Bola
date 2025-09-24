@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getEncontros, deleteEncontro } from "../../services/EncontroService";
 import { useAuth } from "../../context/AuthContext";
+
+import ConfirmModal from "../../components/utils/ConfirmModal";
 import Loading from "../../components/utils/Loading";
 
 import Faixa from "../../components/noticias/Faixa";
@@ -9,6 +11,8 @@ import Faixa from "../../components/noticias/Faixa";
 const AdminDashboard = () => {
   const [encontros, setEncontros] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [encontroParaDeletar, setEncontroParaDeletar] = useState(null);
   const { token } = useAuth();
 
   useEffect(() => {
@@ -37,30 +41,38 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDelete = async (encontroId) => {
-    // Adiciona uma confirmação para evitar exclusões acidentais
-    const isConfirmed = window.confirm(
-      "Você tem certeza que deseja deletar este encontro? Todos os dados de inscrição serão perdidos permanentemente.",
-    );
+  const handleOpenModal = (encontroId) => {
+    setEncontroParaDeletar(encontroId);
+    setIsModalOpen(true);
+  };
 
-    if (isConfirmed) {
-      try {
-        await deleteEncontro(encontroId, token);
-        // Atualiza a lista de encontros na tela removendo o que foi deletado
-        setEncontros(
-          encontros.filter((encontro) => encontro.id !== encontroId),
-        );
-        alert("Encontro deletado com sucesso!");
-      } catch (error) {
-        alert(`Erro ao deletar encontro: ${error.message}`);
-      }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEncontroParaDeletar(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!encontroParaDeletar) return;
+
+    try {
+      await deleteEncontro(encontroParaDeletar, token);
+      setEncontros(
+        encontros.filter((encontro) => encontro.id !== encontroParaDeletar),
+      );
+    } catch (error) {
+      alert(`Erro ao deletar encontro: ${error.message}`);
+    } finally {
+      handleCloseModal();
     }
   };
 
   return (
     <div className="flex w-full flex-col items-center py-26 lg:py-30">
       <div className="w-full px-6 md:max-w-[80%] lg:max-w-[70%]">
-        <Faixa bg={"/images/sections/banner-roxo.webp"} txt={"Painel Administrativo"} />
+        <Faixa
+          bg={"/images/sections/banner-roxo.webp"}
+          txt={"Painel Administrativo"}
+        />
 
         <div className="mt-12">
           <h2 className="mb-6 text-center text-3xl font-bold">
@@ -91,13 +103,13 @@ const AdminDashboard = () => {
                   <div className="flex flex-col gap-2.5">
                     <Link
                       to={`/admin/encontros/${encontro.id}`}
-                      className="w-full rounded bg-[#981FBA] px-4 py-2 text-center font-bold text-white transition-colors hover:bg-[#5b1587] sm:w-auto"
+                      className="cursor-pointer w-full rounded bg-[#981FBA] px-4 py-2 text-center font-bold text-white transition-colors hover:bg-[#5b1587] sm:w-auto"
                     >
                       Ver Detalhes
                     </Link>
                     <button
-                      onClick={() => handleDelete(encontro.id)}
-                      className="w-full rounded bg-red-600 px-4 py-2 text-center font-bold text-white transition-colors hover:bg-red-800 sm:w-auto"
+                      onClick={() => handleOpenModal(encontro.id)}
+                      className="cursor-pointer w-full rounded bg-red-600 px-4 py-2 text-center font-bold text-white transition-colors hover:bg-red-800 sm:w-auto"
                     >
                       Deletar
                     </button>
@@ -107,6 +119,13 @@ const AdminDashboard = () => {
             })}
           </ul>
         </div>
+        <ConfirmModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onConfirm={handleConfirmDelete}
+          title="Confirmar Exclusão"
+          txt={"Você tem certeza que deseja deletar este encontro? Todos os dados de inscrição serão perdidos permanentemente."}
+        />
       </div>
     </div>
   );

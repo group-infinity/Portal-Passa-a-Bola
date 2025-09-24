@@ -29,8 +29,7 @@ export const createEncontro = async (encontroData, token) => {
 export const createInscricao = async (id, inscricaoData) => {
     const response = await fetch(`${API_URL}/${id}/inscricoes`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(inscricaoData),
+      body: inscricaoData,
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Erro ao realizar inscrição.");

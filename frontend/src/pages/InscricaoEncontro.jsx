@@ -11,6 +11,21 @@ import Input from "../components/cadastro/Input";
 import Botao from "../components/cadastro/Botao";
 import AvisoModal from "../components/utils/AvisoModal";
 
+const fileSchema = z
+  .any()
+  .refine((files) => files?.length == 1, "Arquivo é obrigatório.")
+  .refine(
+    (files) => files?.[0]?.size <= 5000000,
+    `Tamanho máximo do arquivo é 5MB.`,
+  )
+  .refine(
+    (files) =>
+      ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
+        files?.[0]?.type,
+      ),
+    "Apenas formatos .jpg, .jpeg, .png e .webp são suportados.",
+  );
+
 const individualSchema = z.object({
   nome: z.string().min(3, "Nome completo é obrigatório"),
   email: z.string().email("E-mail inválido"),
@@ -24,6 +39,11 @@ const individualSchema = z.object({
   dataNascimento: z
     .string()
     .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data inválida (formato: DD/MM/AAAA)"),
+  posicaoPreferida: z.enum(["gol", "defesa", "ataque"], {
+    required_error: "Você precisa selecionar uma posição.",
+  }),
+  fotoDocumento: fileSchema,
+  selfiePessoal: fileSchema,
 });
 
 const jogadoraSchema = z.object({
@@ -39,6 +59,11 @@ const jogadoraSchema = z.object({
   dataNascimento: z
     .string()
     .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data inválida (formato: DD/MM/AAAA)"),
+  posicaoPreferida: z.enum(["gol", "defesa", "ataque"], {
+    required_error: "Você precisa selecionar uma posição.",
+  }),
+  fotoDocumento: fileSchema,
+  selfiePessoal: fileSchema,
 });
 
 const criarConjuntaSchema = (numJogadoras) =>
@@ -54,6 +79,19 @@ const criarConjuntaSchema = (numJogadoras) =>
         `O time deve ter exatamente ${numJogadoras} jogadoras.`,
       ),
   });
+
+const formSchema = (isIndividual, numJogadoras) =>
+  z
+    .object({
+      termos: z.literal(true, {
+        errorMap: () => ({
+          message: "Você deve aceitar os termos para continuar.",
+        }),
+      }),
+    })
+    .merge(
+      isIndividual ? individualSchema : criarConjuntaSchema(numJogadoras || 11),
+    );
 
 function InscricaoEncontro() {
   const { id } = useParams();
@@ -73,12 +111,7 @@ function InscricaoEncontro() {
   const isIndividual = tipoInscricao === "individual";
 
   const currentSchema = useMemo(() => {
-    if (!encontro) {
-      return individualSchema;
-    }
-    return isIndividual
-      ? individualSchema
-      : criarConjuntaSchema(encontro.jogadorasPorTime || 11);
+    return formSchema(isIndividual, encontro?.jogadorasPorTime);
   }, [isIndividual, encontro]);
 
   const {
@@ -155,26 +188,72 @@ function InscricaoEncontro() {
   }, [loading]);
 
   const onSubmit = async (data) => {
-    const inscricaoData = { tipo: tipoInscricao, ...data };
-    try {
-      await createInscricao(id, inscricaoData);
-      setModalContent({
+  const formData = new FormData();
+
+  // Adiciona o tipo de inscrição
+  formData.append('tipo', tipoInscricao);
+
+  // Adiciona os outros campos de dados ao FormData
+  for (const key in data) {
+    if (key !== 'fotoDocumento' && key !== 'selfiePessoal' && key !== 'membros') {
+      formData.append(key, data[key]);
+    }
+  }
+
+  // Adiciona os arquivos de imagem
+  if (data.fotoDocumento?.[0]) {
+    formData.append('fotoDocumento', data.fotoDocumento[0]);
+  }
+  if (data.selfiePessoal?.[0]) {
+    formData.append('selfiePessoal', data.selfiePessoal[0]);
+  }
+
+  // Lógica para inscrição conjunta
+  if (tipoInscricao === 'conjunta' && data.membros) {
+    formData.append('nomeTime', data.nomeTime);
+    formData.append('responsavel', data.responsavel);
+    formData.append('emailResponsavel', data.emailResponsavel);
+
+    data.membros.forEach((membro, index) => {
+      // Adiciona os dados de cada membro
+      Object.keys(membro).forEach(key => {
+        if (key !== 'fotoDocumento' && key !== 'selfiePessoal') {
+          formData.append(`membros[${index}][${key}]`, membro[key]);
+        }
+      });
+      // Adiciona os arquivos de cada membro
+      if (membro.fotoDocumento?.[0]) {
+        formData.append(`membros[${index}][fotoDocumento]`, membro.fotoDocumento[0]);
+      }
+      if (membro.selfiePessoal?.[0]) {
+        formData.append(`membros[${index}][selfiePessoal]`, membro.selfiePessoal[0]);
+      }
+    });
+  }
+
+
+  try {
+    // A função createInscricao precisará ser ajustada para enviar FormData
+    await createInscricao(id, formData);
+    setModalContent({
         title: "Inscrição Realizada com Sucesso!",
         body: "A inscrição foi registrada. Futuramente, as jogadoras receberão uma confirmação por email, no qual também receberão um QR Code para permitir seu acesso ao encontro.",
         imageUrl: "/qrCode.png",
       });
       setOnModalClose(() => () => navigate("/encontros"));
       setIsModalOpen(true);
-    } catch (error) {
-      setModalContent({
+    // ... resto da sua lógica de sucesso
+  } catch (error) {
+    setModalContent({
         title: "Erro na Inscrição",
         body: `Não foi possível completar sua inscrição. Motivo: ${error.message}`,
         imageUrl: null,
       });
       setOnModalClose(() => () => {});
       setIsModalOpen(true);
-    }
-  };
+    // ... resto da sua lógica de erro
+  }
+};
 
   const handleSeedForm = () => {
     if (tipoInscricao === "conjunta" && encontro) {
@@ -216,7 +295,10 @@ function InscricaoEncontro() {
 
       <div className="mt-16 flex w-full flex-col items-center py-16 lg:py-30">
         <div className="w-full px-6 md:max-w-[80%] lg:max-w-[60%]">
-          <Faixa txt={`Inscrição: ${encontro?.nome}`} bg={"/images/sections/banner-verm.webp"} />
+          <Faixa
+            txt={`Inscrição: ${encontro?.nome}`}
+            bg={"/images/sections/banner-verm.webp"}
+          />
 
           <div className="my-8 flex items-center justify-center gap-8">
             <div className="flex justify-center gap-4">
@@ -248,7 +330,9 @@ function InscricaoEncontro() {
           >
             {isIndividual ? (
               <fieldset>
-                <legend className="sr-only">Formulário de Inscrição Individual</legend>
+                <legend className="sr-only">
+                  Formulário de Inscrição Individual
+                </legend>
                 <div className="flex flex-col gap-5">
                   <Input
                     label="Seu Nome Completo"
@@ -283,6 +367,48 @@ function InscricaoEncontro() {
                     register={register("dataNascimento")}
                     error={errors.dataNascimento}
                   />
+                  <Input
+                    label="Foto do Documento (Frente e Verso)"
+                    type="file"
+                    register={register("fotoDocumento")}
+                    error={errors.fotoDocumento}
+                  />
+                  <Input
+                    label="Selfie Pessoal"
+                    type="file"
+                    register={register("selfiePessoal")}
+                    error={errors.selfiePessoal}
+                  />
+                  <fieldset>
+                    <legend className="mb-2 block text-sm font-medium text-gray-700">
+                      Prefere jogar:
+                    </legend>
+                    <div className="flex items-center gap-4">
+                      {["No gol", "Na defesa", "No ataque"].map((pos) => {
+                        const posValue = pos
+                          .split(" ")[1]
+                          .toLowerCase()
+                          .normalize("NFD")
+                          .replace(/[\u0300-\u036f]/g, "");
+                        return (
+                          <label key={pos} className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              value={posValue}
+                              {...register("posicaoPreferida")}
+                              className="h-4 w-4 text-[#BA1B31] focus:ring-[#BA1B31]"
+                            />
+                            {pos}
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {errors.posicaoPreferida && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.posicaoPreferida.message}
+                      </p>
+                    )}
+                  </fieldset>
                 </div>
               </fieldset>
             ) : (
@@ -362,13 +488,90 @@ function InscricaoEncontro() {
                             )}
                             error={errors.membros?.[index]?.dataNascimento}
                           />
+                          <Input
+                            label="Foto do Documento"
+                            type="file"
+                            register={register(
+                              `membros.${index}.fotoDocumento`,
+                            )}
+                            error={errors.membros?.[index]?.fotoDocumento}
+                          />
+                          <Input
+                            label="Selfie Pessoal"
+                            type="file"
+                            register={register(
+                              `membros.${index}.selfiePessoal`,
+                            )}
+                            error={errors.membros?.[index]?.selfiePessoal}
+                          />
                         </div>
+                        <fieldset className="mt-4">
+                          <legend className="mb-2 block text-sm font-medium text-gray-700">
+                            Prefere jogar:
+                          </legend>
+                          <div className="flex items-center gap-4">
+                            {["No gol", "Na defesa", "No ataque"].map((pos) => {
+                              const posValue = pos
+                                .split(" ")[1]
+                                .toLowerCase()
+                                .normalize("NFD")
+                                .replace(/[\u0300-\u036f]/g, "");
+                              return (
+                                <label
+                                  key={pos}
+                                  className="flex items-center gap-2"
+                                >
+                                  <input
+                                    type="radio"
+                                    value={posValue}
+                                    {...register(
+                                      `membros.${index}.posicaoPreferida`,
+                                    )}
+                                    className="h-4 w-4 text-[#BA1B31] focus:ring-[#BA1B31]"
+                                  />
+                                  {pos}
+                                </label>
+                              );
+                            })}
+                          </div>
+                          {errors.membros?.[index]?.posicaoPreferida && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.membros[index].posicaoPreferida.message}
+                            </p>
+                          )}
+                        </fieldset>
                       </div>
                     ))}
                   </div>
                 </fieldset>
               </div>
             )}
+
+            <div className="mt-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  {...register("termos")}
+                  className="h-4 w-4 rounded text-[#BA1B31] focus:ring-[#BA1B31]"
+                />
+                <span className="text-sm text-gray-700">
+                  Eu li e concordo com os{" "}
+                  <a href="#" className="text-[#BA1B31] hover:underline">
+                    termos de uso
+                  </a>{" "}
+                  e a{" "}
+                  <a href="#" className="text-[#BA1B31] hover:underline">
+                    política de privacidade
+                  </a>
+                  .
+                </span>
+              </label>
+              {errors.termos && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.termos.message}
+                </p>
+              )}
+            </div>
 
             <Botao
               txt={"confirmar inscrição"}
