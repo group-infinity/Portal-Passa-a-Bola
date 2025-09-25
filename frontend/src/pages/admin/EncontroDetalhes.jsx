@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getEncontroById } from "../../services/EncontroService";
 import { ArrowLeft } from "lucide-react";
-import { OrbitProgress } from "react-loading-indicators";
+import Loading from "../../components/utils/Loading"; // Import que faltava
 
 import Banner from "../../components/home/Banner";
+import Chaveamento from "../../components/admin/Chaveamento"; // Import do novo componente
 
 const EncontroDetalhes = () => {
   const { id } = useParams();
@@ -47,11 +48,20 @@ const EncontroDetalhes = () => {
     return listaAchatada;
   }, [encontro]);
 
+  // A função verifyLoading já está correta
   const verifyLoading = () => {
     if (loading) {
       return <Loading cor="#981FBA" txt="Carregando detalhes do encontro..." />;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loading cor="#981FBA" txt="Carregando detalhes do encontro..." />
+      </div>
+    );
+  }
 
   if (!encontro) {
     return (
@@ -81,6 +91,9 @@ const EncontroDetalhes = () => {
             {encontro.totalVagas}
           </p>
         </div>
+
+        {/* Adicionando o componente de chaveamento */}
+        <Chaveamento encontroId={id} />
 
         <div>
           <h2 className="mb-4 text-2xl font-bold">Lista de Participantes</h2>

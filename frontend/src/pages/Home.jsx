@@ -85,7 +85,7 @@ function Home() {
             />
 
             <div className="relative mt-4 flex w-full flex-col gap-4">
-              <div className="w-full flex justify-center gap-3 overflow-x-auto pb-4">
+              <div className="w-full flex gap-3 overflow-x-auto pb-4">
                 {loading && (
                   <Loading cor="#BA1B31" txt="Buscando encontros..." />
                 )}

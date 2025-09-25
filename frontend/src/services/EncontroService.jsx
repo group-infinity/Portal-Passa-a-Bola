@@ -12,6 +12,13 @@ export const getEncontroById = async (id) => {
   return await response.json();
 };
 
+// NOVA FUNÇÃO AQUI
+export const getChaveamentoEncontro = async (id) => {
+  const response = await fetch(`${API_URL}/${id}/chaveamento`);
+  if (!response.ok) throw new Error("Falha ao buscar o chaveamento do encontro.");
+  return await response.json();
+}
+
 export const createEncontro = async (encontroData, token) => {
   const response = await fetch(API_URL, {
     method: "POST",

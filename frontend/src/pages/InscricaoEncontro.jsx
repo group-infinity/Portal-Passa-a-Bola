@@ -188,72 +188,81 @@ function InscricaoEncontro() {
   }, [loading]);
 
   const onSubmit = async (data) => {
-  const formData = new FormData();
+    const formData = new FormData();
 
-  // Adiciona o tipo de inscrição
-  formData.append('tipo', tipoInscricao);
+    // Adiciona o tipo de inscrição
+    formData.append("tipo", tipoInscricao);
 
-  // Adiciona os outros campos de dados ao FormData
-  for (const key in data) {
-    if (key !== 'fotoDocumento' && key !== 'selfiePessoal' && key !== 'membros') {
-      formData.append(key, data[key]);
+    // Adiciona os outros campos de dados ao FormData
+    for (const key in data) {
+      if (
+        key !== "fotoDocumento" &&
+        key !== "selfiePessoal" &&
+        key !== "membros"
+      ) {
+        formData.append(key, data[key]);
+      }
     }
-  }
 
-  // Adiciona os arquivos de imagem
-  if (data.fotoDocumento?.[0]) {
-    formData.append('fotoDocumento', data.fotoDocumento[0]);
-  }
-  if (data.selfiePessoal?.[0]) {
-    formData.append('selfiePessoal', data.selfiePessoal[0]);
-  }
+    // Adiciona os arquivos de imagem
+    if (data.fotoDocumento?.[0]) {
+      formData.append("fotoDocumento", data.fotoDocumento[0]);
+    }
+    if (data.selfiePessoal?.[0]) {
+      formData.append("selfiePessoal", data.selfiePessoal[0]);
+    }
 
-  // Lógica para inscrição conjunta
-  if (tipoInscricao === 'conjunta' && data.membros) {
-    formData.append('nomeTime', data.nomeTime);
-    formData.append('responsavel', data.responsavel);
-    formData.append('emailResponsavel', data.emailResponsavel);
+    // Lógica para inscrição conjunta
+    if (tipoInscricao === "conjunta" && data.membros) {
+      formData.append("nomeTime", data.nomeTime);
+      formData.append("responsavel", data.responsavel);
+      formData.append("emailResponsavel", data.emailResponsavel);
 
-    data.membros.forEach((membro, index) => {
-      // Adiciona os dados de cada membro
-      Object.keys(membro).forEach(key => {
-        if (key !== 'fotoDocumento' && key !== 'selfiePessoal') {
-          formData.append(`membros[${index}][${key}]`, membro[key]);
+      data.membros.forEach((membro, index) => {
+        // Adiciona os dados de cada membro
+        Object.keys(membro).forEach((key) => {
+          if (key !== "fotoDocumento" && key !== "selfiePessoal") {
+            formData.append(`membros[${index}][${key}]`, membro[key]);
+          }
+        });
+        // Adiciona os arquivos de cada membro
+        if (membro.fotoDocumento?.[0]) {
+          formData.append(
+            `membros[${index}][fotoDocumento]`,
+            membro.fotoDocumento[0],
+          );
+        }
+        if (membro.selfiePessoal?.[0]) {
+          formData.append(
+            `membros[${index}][selfiePessoal]`,
+            membro.selfiePessoal[0],
+          );
         }
       });
-      // Adiciona os arquivos de cada membro
-      if (membro.fotoDocumento?.[0]) {
-        formData.append(`membros[${index}][fotoDocumento]`, membro.fotoDocumento[0]);
-      }
-      if (membro.selfiePessoal?.[0]) {
-        formData.append(`membros[${index}][selfiePessoal]`, membro.selfiePessoal[0]);
-      }
-    });
-  }
+    }
 
-
-  try {
-    // A função createInscricao precisará ser ajustada para enviar FormData
-    await createInscricao(id, formData);
-    setModalContent({
+    try {
+      // A função createInscricao precisará ser ajustada para enviar FormData
+      await createInscricao(id, formData);
+      setModalContent({
         title: "Inscrição Realizada com Sucesso!",
         body: "A inscrição foi registrada. Futuramente, as jogadoras receberão uma confirmação por email, no qual também receberão um QR Code para permitir seu acesso ao encontro.",
         imageUrl: "/qrCode.png",
       });
       setOnModalClose(() => () => navigate("/encontros"));
       setIsModalOpen(true);
-    // ... resto da sua lógica de sucesso
-  } catch (error) {
-    setModalContent({
+      // ... resto da sua lógica de sucesso
+    } catch (error) {
+      setModalContent({
         title: "Erro na Inscrição",
         body: `Não foi possível completar sua inscrição. Motivo: ${error.message}`,
         imageUrl: null,
       });
       setOnModalClose(() => () => {});
       setIsModalOpen(true);
-    // ... resto da sua lógica de erro
-  }
-};
+      // ... resto da sua lógica de erro
+    }
+  };
 
   const handleSeedForm = () => {
     if (tipoInscricao === "conjunta" && encontro) {
