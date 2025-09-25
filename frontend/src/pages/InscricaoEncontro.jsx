@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import imageCompression from "browser-image-compression";
+
 import { getEncontroById, createInscricao } from "../services/EncontroService";
 import { gerarDadosJogadora } from "../components/utils/faker";
 
@@ -189,60 +191,70 @@ function InscricaoEncontro() {
 
   const onSubmit = async (data) => {
     const formData = new FormData();
-
-    // Adiciona o tipo de inscrição
     formData.append("tipo", tipoInscricao);
 
-    // Adiciona os outros campos de dados ao FormData
-    for (const key in data) {
-      if (
-        key !== "fotoDocumento" &&
-        key !== "selfiePessoal" &&
-        key !== "membros"
-      ) {
-        formData.append(key, data[key]);
+    // Função auxiliar para comprimir uma imagem
+    const compressImage = async (file) => {
+      if (!file) return null;
+      console.log(
+        `Tamanho original: ${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      );
+      const options = {
+        maxSizeMB: 0.5, // Comprime para no máximo 0.5 MB
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      try {
+        const compressedFile = await imageCompression(file, options);
+        console.log(
+          `Tamanho comprimido: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`,
+        );
+        return compressedFile;
+      } catch (error) {
+        console.error("Erro na compressão:", error);
+        return file; // Retorna o arquivo original em caso de erro
       }
-    }
-
-    // Adiciona os arquivos de imagem
-    if (data.fotoDocumento?.[0]) {
-      formData.append("fotoDocumento", data.fotoDocumento[0]);
-    }
-    if (data.selfiePessoal?.[0]) {
-      formData.append("selfiePessoal", data.selfiePessoal[0]);
-    }
-
-    // Lógica para inscrição conjunta
-    if (tipoInscricao === "conjunta" && data.membros) {
-      formData.append("nomeTime", data.nomeTime);
-      formData.append("responsavel", data.responsavel);
-      formData.append("emailResponsavel", data.emailResponsavel);
-
-      data.membros.forEach((membro, index) => {
-        // Adiciona os dados de cada membro
-        Object.keys(membro).forEach((key) => {
-          if (key !== "fotoDocumento" && key !== "selfiePessoal") {
-            formData.append(`membros[${index}][${key}]`, membro[key]);
-          }
-        });
-        // Adiciona os arquivos de cada membro
-        if (membro.fotoDocumento?.[0]) {
-          formData.append(
-            `membros[${index}][fotoDocumento]`,
-            membro.fotoDocumento[0],
-          );
-        }
-        if (membro.selfiePessoal?.[0]) {
-          formData.append(
-            `membros[${index}][selfiePessoal]`,
-            membro.selfiePessoal[0],
-          );
-        }
-      });
-    }
+    };
 
     try {
-      // A função createInscricao precisará ser ajustada para enviar FormData
+      // Inscrição individual
+      if (tipoInscricao === "individual") {
+        // ... outros campos
+        if (data.fotoDocumento?.[0]) {
+          const compressed = await compressImage(data.fotoDocumento[0]);
+          formData.append("fotoDocumento", compressed);
+        }
+        if (data.selfiePessoal?.[0]) {
+          const compressed = await compressImage(data.selfiePessoal[0]);
+          formData.append("selfiePessoal", compressed);
+        }
+      }
+      // Inscrição de time
+      else if (tipoInscricao === "conjunta" && data.membros) {
+        // ... outros campos do time ...
+
+        // Itera sobre os membros e comprime as imagens de cada um
+        for (let i = 0; i < data.membros.length; i++) {
+          const membro = data.membros[i];
+          // Adiciona dados de texto
+          Object.keys(membro).forEach((key) => {
+            if (key !== "fotoDocumento" && key !== "selfiePessoal") {
+              formData.append(`membros[${i}][${key}]`, membro[key]);
+            }
+          });
+          // Comprime e adiciona os arquivos
+          if (membro.fotoDocumento?.[0]) {
+            const compressed = await compressImage(membro.fotoDocumento[0]);
+            formData.append(`membros[${i}][fotoDocumento]`, compressed);
+          }
+          if (membro.selfiePessoal?.[0]) {
+            const compressed = await compressImage(membro.selfiePessoal[0]);
+            formData.append(`membros[${i}][selfiePessoal]`, compressed);
+          }
+        }
+      }
+
+      // Envia o formulário para o backend
       await createInscricao(id, formData);
       setModalContent({
         title: "Inscrição Realizada com Sucesso!",
