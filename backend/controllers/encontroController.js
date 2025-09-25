@@ -7,22 +7,26 @@ import qrcode from 'qrcode';
 // Crie uma instância do Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const sendEmailWithQRCode = async (jogadora) => {
+// Função modificada para aceitar dados únicos para o QR Code
+const sendEmailWithQRCode = async (jogadora, encontroNome, qrCodeData) => {
   try {
-    // Gera o QR Code em formato base64
-    const qrCodeDataURL = await qrcode.toDataURL(jogadora.email);
+    // 1. Converte o objeto de dados únicos para uma string JSON
+    const qrCodePayload = JSON.stringify(qrCodeData);
+    console.log(`Gerando QR Code com o seguinte payload: ${qrCodePayload}`);
+
+    // 2. Gera o QR Code a partir da string JSON
+    const qrCodeDataURL = await qrcode.toDataURL(qrCodePayload);
     const qrCodeBase64 = qrCodeDataURL.split("base64,")[1];
 
     await resend.emails.send({
-      from: 'Passa a Bola <teste@passaabolateste.app>', // Remetente de teste, não precisa mudar
+      from: 'Passa a Bola <inscricoes@passaabolateste.app>',
       to: jogadora.email,
-      subject: `✅ Sua inscrição para o encontro foi confirmada!`,
+      subject: `✅ Inscrição confirmada para o ${encontroNome}!`,
       html: `
         <h1>Olá, ${jogadora.nome}!</h1>
-        <p>Sua inscrição foi confirmada com sucesso.</p>
-        <p>Apresente este QR Code na entrada do evento.</p>
+        <p>Sua inscrição para o encontro <strong>${encontroNome}</strong> foi confirmada com sucesso.</p>
+        <p>Apresente este QR Code na entrada do evento para validar seu acesso. Ele é único e intransferível.</p>
         <p>Nos vemos em campo!</p>
-        <h2>(ignore o qr code)</h2>
       `,
       attachments: [{
         filename: 'qrcode.png',
@@ -36,6 +40,7 @@ const sendEmailWithQRCode = async (jogadora) => {
     console.error('Erro ao enviar o e-mail:', error);
   }
 };
+
 
 export const getAllEncontros = async (req, res) => {
   try {
@@ -129,11 +134,11 @@ export const createInscricao = async (req, res) => {
   const files = req.files || [];
 
   try {
-    const { rows: encontros } = await sql`SELECT "totalVagas", "jogadorasPorTime" FROM encontros WHERE id = ${encontro_id}`;
+    const { rows: encontros } = await sql`SELECT nome, "totalVagas", "jogadorasPorTime" FROM encontros WHERE id = ${encontro_id}`;
     if (encontros.length === 0) {
       return res.status(404).json({ error: "Encontro não encontrado." });
     }
-    const { totalVagas } = encontros[0];
+    const { nome: encontroNome, totalVagas } = encontros[0];
 
     const { rows: inscricoesAnteriores } = await sql`SELECT tipo, membros FROM inscricoes WHERE encontro_id = ${encontro_id}`;
     let vagasOcupadas = 0;
@@ -141,7 +146,6 @@ export const createInscricao = async (req, res) => {
       vagasOcupadas += insc.tipo === "individual" ? 1 : (insc.membros || []).length;
     });
 
-    // CORREÇÃO: Processamento correto dos membros
     let membrosInput = [];
     if (tipo === "conjunta") {
       if (typeof dados.membros === 'string') {
@@ -164,7 +168,6 @@ export const createInscricao = async (req, res) => {
       return res.status(400).json({ error: "Inscrições esgotadas para este encontro!" });
     }
 
-    // CORREÇÃO: Construção correta do array de emails
     let emailsParaVerificar = [];
     if (tipo === "individual") {
       if (dados.email) emailsParaVerificar.push(dados.email);
@@ -175,15 +178,11 @@ export const createInscricao = async (req, res) => {
       });
     }
 
-    // CORREÇÃO: Filtrar valores nulos/vazios e garantir que é um array plano
     const emailsUnicos = [...new Set(emailsParaVerificar.filter(email =>
       email && typeof email === 'string' && email.trim() !== ''
     ))];
 
-    console.log('Emails para verificar:', emailsUnicos); // Debug
-
     if (emailsUnicos.length > 0) {
-      // CORREÇÃO: Usar a sintaxe correta para arrays no PostgreSQL
       const { rows: duplicatasEmail } = await sql`
         SELECT email FROM inscricoes
         WHERE encontro_id = ${encontro_id} AND email = ANY(${emailsUnicos})
@@ -214,11 +213,22 @@ export const createInscricao = async (req, res) => {
       const fotoDocumentoUrl = await uploadFile(fotoDocumentoFile);
       const selfiePessoalUrl = await uploadFile(selfiePessoalFile);
 
-      await sql`
+      const { rows } = await sql`
           INSERT INTO inscricoes (encontro_id, tipo, nome, email, cpf, telefone, "dataNascimento", "posicaoPreferida", "fotoDocumentoUrl", "selfiePessoalUrl")
           VALUES (${encontro_id}, ${tipo}, ${nome}, ${email}, ${cpf}, ${telefone}, ${dataNascimento}, ${posicaoPreferida}, ${fotoDocumentoUrl}, ${selfiePessoalUrl})
+          RETURNING id
       `;
-      await sendEmailWithQRCode({ nome: dados.nome, email: dados.email });
+      const inscricaoId = rows[0].id;
+
+      const qrCodeData = {
+        inscricaoId,
+        encontroId: encontro_id,
+        nome,
+        email,
+        cpf
+      };
+
+      await sendEmailWithQRCode({ nome, email }, encontroNome, qrCodeData);
     } else if (tipo === "conjunta") {
       const { nomeTime, responsavel, emailResponsavel } = dados;
 
@@ -266,6 +276,7 @@ export const createInscricao = async (req, res) => {
           }
 
           return {
+            jogadoraId: uuidv4(),
             nome: membro.nome,
             email: membro.email,
             cpf: membro.cpf,
@@ -278,10 +289,9 @@ export const createInscricao = async (req, res) => {
         })
       );
 
-      // CORREÇÃO: Garantir que membrosComUrl seja um array válido
       const membrosJSON = JSON.stringify(membrosComUrl);
 
-      await sql`
+      const { rows } = await sql`
           INSERT INTO inscricoes (encontro_id, tipo, "nomeTime", nome, email, membros)
           VALUES (
             ${encontro_id},
@@ -291,10 +301,21 @@ export const createInscricao = async (req, res) => {
             ${emailResponsavel},
             ${membrosJSON}::jsonb
           )
+          RETURNING id
       `;
-      // Envia e-mails para cada membro com um pequeno delay entre eles para evitar sobrecarga
+      const inscricaoTimeId = rows[0].id;
+
       for (const membro of membrosComUrl) {
-        await sendEmailWithQRCode({ nome: membro.nome, email: membro.email });
+        const qrCodeData = {
+          inscricaoId: inscricaoTimeId,
+          jogadoraId: membro.jogadoraId,
+          encontroId: encontro_id,
+          nomeTime,
+          nome: membro.nome,
+          email: membro.email,
+          cpf: membro.cpf,
+        };
+        await sendEmailWithQRCode(membro, encontroNome, qrCodeData);
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
@@ -303,7 +324,6 @@ export const createInscricao = async (req, res) => {
   } catch (error) {
     console.error(`Erro ao realizar inscrição:`, error);
 
-    // CORREÇÃO: Melhor tratamento de erro para PostgreSQL
     if (error.code === "23505") { // Unique violation
       return res.status(400).json({ error: "Email já cadastrado para este encontro." });
     }

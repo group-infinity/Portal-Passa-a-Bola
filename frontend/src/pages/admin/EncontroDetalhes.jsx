@@ -67,7 +67,7 @@ const EncontroDetalhes = () => {
   return (
     <div className="relative flex flex-col items-center pt-26 lg:pt-30">
       <Banner img={"/images/sections/faixa-roxa.webp"} cor={"#981FBA"} txt={encontro.nome} />
-      <div className="relative -top-5 mx-auto w-full p-6 md:max-w-[80%] lg:max-w-[70%]">
+      <div className="relative -top-5 mx-auto w-full p-6">
         <div className="mb-8 rounded-lg border bg-gray-50 p-4 shadow-md">
           <h2 className="mb-2 text-2xl font-bold">Resumo do Encontro</h2>
           <p>
@@ -113,6 +113,15 @@ const EncontroDetalhes = () => {
                     <th scope="col" className="px-4 py-2 text-left">
                       Time / Inscrição
                     </th>
+                    <th scope="col" className="px-4 py-2 text-left">
+                      Foto do Documento
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left">
+                      Selfie Pessoal
+                    </th>
+                    <th scope="col" className="px-4 py-2 text-left">
+                      Posição Preferida
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -126,6 +135,9 @@ const EncontroDetalhes = () => {
                         {participante.dataNascimento}
                       </td>
                       <td className="px-4 py-2">{participante.time}</td>
+                      <td className="px-4 py-2 truncate max-w-[200px]">{participante.fotoDocumentoUrl}</td>
+                      <td className="px-4 py-2 truncate max-w-[200px]">{participante.selfiePessoalUrl}</td>
+                      <td className="px-4 py-2 capitalize">{participante.posicaoPreferida}</td>
                     </tr>
                   ))}
                 </tbody>

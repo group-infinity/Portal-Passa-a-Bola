@@ -83,7 +83,6 @@ const encontroSchema = z
       });
     } else {
       const totalVagas = Number(data.totalVagas);
-      const numJogadoras = Number(data.jogadorasPorTime);
 
       if (totalVagas <= 0) {
         ctx.addIssue({
@@ -91,23 +90,6 @@ const encontroSchema = z
           path: ["totalVagas"],
           message: "O total de vagas deve ser maior que zero.",
         });
-      }
-
-      if (numJogadoras > 0 && totalVagas % numJogadoras !== 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["totalVagas"],
-          message: `Total de vagas deve ser divisível por ${numJogadoras}.`,
-        });
-      } else if (numJogadoras > 0) {
-        const numeroDeTimes = totalVagas / numJogadoras;
-        if (numeroDeTimes % 2 !== 0) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["totalVagas"],
-            message: `Cria um número ímpar de times (${numeroDeTimes}). Ajuste as vagas para formar um número par de times.`,
-          });
-        }
       }
     }
   });
