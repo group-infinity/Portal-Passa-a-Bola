@@ -1,6 +1,41 @@
 import { sql } from "@vercel/postgres";
 import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
+import { Resend } from 'resend';
+import qrcode from 'qrcode';
+
+// Crie uma instância do Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const sendEmailWithQRCode = async (jogadora) => {
+  try {
+    // Gera o QR Code em formato base64
+    const qrCodeDataURL = await qrcode.toDataURL(jogadora.email);
+    const qrCodeBase64 = qrCodeDataURL.split("base64,")[1];
+
+    await resend.emails.send({
+      from: 'Passa a Bola <onboarding@resend.dev>', // Remetente de teste, não precisa mudar
+      to: jogadora.email,
+      subject: `✅ Sua inscrição para o encontro foi confirmada!`,
+      html: `
+        <h1>Olá, ${jogadora.nome}!</h1>
+        <p>Sua inscrição foi confirmada com sucesso.</p>
+        <p>Apresente este QR Code na entrada do evento.</p>
+        <p>Nos vemos em campo!</p>
+        <h2>(ignore o qr code)</h2>
+      `,
+      attachments: [{
+        filename: 'qrcode.png',
+        content: qrCodeBase64,
+      }]
+    });
+
+    console.log(`E-mail de confirmação enviado para ${jogadora.email}`);
+
+  } catch (error) {
+    console.error('Erro ao enviar o e-mail:', error);
+  }
+};
 
 export const getAllEncontros = async (req, res) => {
   try {
@@ -183,6 +218,7 @@ export const createInscricao = async (req, res) => {
           INSERT INTO inscricoes (encontro_id, tipo, nome, email, cpf, telefone, "dataNascimento", "posicaoPreferida", "fotoDocumentoUrl", "selfiePessoalUrl")
           VALUES (${encontro_id}, ${tipo}, ${nome}, ${email}, ${cpf}, ${telefone}, ${dataNascimento}, ${posicaoPreferida}, ${fotoDocumentoUrl}, ${selfiePessoalUrl})
       `;
+      await sendEmailWithQRCode({ nome: dados.nome, email: dados.email });
     } else if (tipo === "conjunta") {
       const { nomeTime, responsavel, emailResponsavel } = dados;
 
@@ -256,6 +292,9 @@ export const createInscricao = async (req, res) => {
             ${membrosJSON}::jsonb
           )
       `;
+      for (const membro of membrosComUrl) { // 'membrosComUrl' do seu código original
+        await sendEmailWithQRCode({ nome: membro.nome, email: membro.email });
+      }
     }
 
     res.status(201).json({ message: "Inscrição realizada com sucesso!" });
