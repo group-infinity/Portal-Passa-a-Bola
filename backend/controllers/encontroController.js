@@ -14,7 +14,7 @@ const sendEmailWithQRCode = async (jogadora) => {
     const qrCodeBase64 = qrCodeDataURL.split("base64,")[1];
 
     await resend.emails.send({
-      from: 'Passa a Bola <onboarding@resend.dev>', // Remetente de teste, não precisa mudar
+      from: 'Passa a Bola <teste@passaabolateste.app>', // Remetente de teste, não precisa mudar
       to: jogadora.email,
       subject: `✅ Sua inscrição para o encontro foi confirmada!`,
       html: `
@@ -292,8 +292,10 @@ export const createInscricao = async (req, res) => {
             ${membrosJSON}::jsonb
           )
       `;
-      for (const membro of membrosComUrl) { // 'membrosComUrl' do seu código original
+      // Envia e-mails para cada membro com um pequeno delay entre eles para evitar sobrecarga
+      for (const membro of membrosComUrl) {
         await sendEmailWithQRCode({ nome: membro.nome, email: membro.email });
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
 
