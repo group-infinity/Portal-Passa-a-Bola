@@ -19,7 +19,7 @@ const sendEmailWithQRCode = async (jogadora, encontroNome, qrCodeData) => {
     const qrCodeBase64 = qrCodeDataURL.split("base64,")[1];
 
     await resend.emails.send({
-      from: "Passa a Bola <inscricoes@passaabolateste.app>",
+      from: "Passa a Bola <nao-responda@passaabolateste.app>",
       to: jogadora.email,
       subject: `✅ Inscrição confirmada para o ${encontroNome}!`,
       html: `
@@ -150,28 +150,37 @@ export const createInscricao = async (req, res) => {
     const vagasNecessarias = tipo === "individual" ? 1 : Array.isArray(dados.membros) ? dados.membros.length : 0;
     if (vagasOcupadas + vagasNecessarias > totalVagas) {
       return res.status(400).json({ error: "Inscrições esgotadas para este encontro!" });
-    } // --- Verificação de Emails Duplicados (Original, com pequena correção) ---
+    } // --- Verificação de Emails Duplicados (Refatorada) ---
 
     let emailsParaVerificar = [];
     if (tipo === "individual") {
-      if (dados.email) emailsParaVerificar.push(dados.email);
+        if (dados.email) emailsParaVerificar.push(dados.email);
     } else if (tipo === "conjunta" && Array.isArray(dados.membros)) {
-      // Pega o primeiro email de responsável, caso venha como array
-      const emailResponsavel = Array.isArray(dados.emailResponsavel) ? dados.emailResponsavel[0] : dados.emailResponsavel;
-      if (emailResponsavel) emailsParaVerificar.push(emailResponsavel);
-
-      dados.membros.forEach((membro) => {
-        if (membro && membro.email) emailsParaVerificar.push(membro.email);
-      });
+        const emailResponsavel = Array.isArray(dados.emailResponsavel) ? dados.emailResponsavel[0] : dados.emailResponsavel;
+        if (emailResponsavel) emailsParaVerificar.push(emailResponsavel);
+        dados.membros.forEach(membro => {
+            if (membro && membro.email) emailsParaVerificar.push(membro.email);
+        });
     }
 
-    const emailsUnicos = [...new Set(emailsParaVerificar.filter((email) => email && typeof email === "string" && email.trim() !== ""))];
+    const emailsUnicos = [...new Set(emailsParaVerificar.filter(email => email && typeof email === 'string' && email.trim() !== ''))];
     if (emailsUnicos.length > 0) {
-      const { rows: duplicatasEmail } = await sql`SELECT email FROM inscricoes WHERE encontro_id = ${encontro_id} AND email = ANY(${emailsUnicos}) UNION SELECT value->>'email' as email FROM inscricoes, jsonb_array_elements(membros) WHERE encontro_id = ${encontro_id} AND value->>'email' = ANY(${emailsUnicos})`;
-      if (duplicatasEmail.length > 0) {
-        return res.status(400).json({ error: `O email '${duplicatasEmail[0].email}' já está inscrito neste encontro.` });
-      }
-    } // --- Função de Upload (Original) ---
+        const { rows: duplicatasIndividuais } = await sql`
+            SELECT email FROM inscricoes
+            WHERE encontro_id = ${encontro_id} AND tipo = 'individual' AND email = ANY(${emailsUnicos})
+        `;
+        if (duplicatasIndividuais.length > 0) {
+            return res.status(400).json({ error: `O email '${duplicatasIndividuais[0].email}' já está inscrito neste encontro.` });
+        }
+        const { rows: duplicatasConjuntas } = await sql`
+            SELECT value->>'email' as email FROM inscricoes, jsonb_array_elements(membros)
+            WHERE encontro_id = ${encontro_id} AND tipo = 'conjunta' AND value->>'email' = ANY(${emailsUnicos})
+        `;
+        if (duplicatasConjuntas.length > 0) {
+            return res.status(400).json({ error: `O email '${duplicatasConjuntas[0].email}' já está inscrito neste encontro.` });
+        }
+    }
+
 
     const uploadFile = async (file) => {
       if (!file) return null;
@@ -289,3 +298,56 @@ export const deleteEncontro = async (req, res) => {
     res.status(500).json({ error: "Erro interno do servidor ao tentar deletar o encontro." });
   }
 };
+
+// NOVA FUNÇÃO PARA DELETAR PARTICIPANTE
+export const deleteParticipante = async (req, res) => {
+    const { encontroId, inscricaoId, jogadoraId } = req.body;
+
+    if (!encontroId || !inscricaoId) {
+      return res.status(400).json({ error: "ID do encontro e da inscrição são obrigatórios." });
+    }
+
+    try {
+      const { rows: inscricoes } = await sql`SELECT tipo, membros FROM inscricoes WHERE id = ${inscricaoId} AND encontro_id = ${encontroId}`;
+
+      if (inscricoes.length === 0) {
+        return res.status(404).json({ error: "Inscrição não encontrada neste encontro." });
+      }
+
+      const inscricao = inscricoes[0];
+
+      if (inscricao.tipo === 'individual') {
+        // Se for individual, deleta a inscrição inteira
+        await sql`DELETE FROM inscricoes WHERE id = ${inscricaoId}`;
+        return res.status(200).json({ message: "Participante removido com sucesso." });
+      }
+
+      if (inscricao.tipo === 'conjunta') {
+        if (!jogadoraId) {
+            return res.status(400).json({ error: "ID da jogadora é obrigatório para remover de um time." });
+        }
+        // Se for de time, remove apenas o membro do array JSONB
+        const membrosAtuais = inscricao.membros || [];
+        const novosMembros = membrosAtuais.filter(m => m.jogadoraId !== jogadoraId);
+
+        if (novosMembros.length === membrosAtuais.length) {
+            return res.status(404).json({ error: "Jogadora não encontrada na inscrição." });
+        }
+
+        // Se o time ficar vazio após a remoção, deleta a inscrição inteira
+        if (novosMembros.length === 0) {
+            await sql`DELETE FROM inscricoes WHERE id = ${inscricaoId}`;
+        } else {
+            const novosMembrosJson = JSON.stringify(novosMembros);
+            await sql`UPDATE inscricoes SET membros = ${novosMembrosJson}::jsonb WHERE id = ${inscricaoId}`;
+        }
+
+        return res.status(200).json({ message: "Participante removido com sucesso." });
+      }
+
+    } catch (error) {
+      console.error("Erro ao deletar participante:", error);
+      res.status(500).json({ error: "Erro interno do servidor." });
+    }
+  };
+

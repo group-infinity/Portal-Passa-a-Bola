@@ -12,7 +12,6 @@ export const getEncontroById = async (id) => {
   return await response.json();
 };
 
-// NOVA FUNÇÃO AQUI
 export const getChaveamentoEncontro = async (id) => {
   const response = await fetch(`${API_URL}/${id}/chaveamento`);
   if (!response.ok) throw new Error("Falha ao buscar o chaveamento do encontro.");
@@ -58,3 +57,21 @@ export const deleteEncontro = async (id, token) => {
 
   return await response.json();
 };
+
+export const deleteParticipante = async (data, token) => {
+    const response = await fetch(`${API_URL}/participante`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error || 'Falha ao deletar o participante.');
+    }
+
+    return await response.json();
+  };

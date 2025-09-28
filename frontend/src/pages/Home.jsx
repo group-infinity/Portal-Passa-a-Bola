@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import Banner from "../components/home/Banner";
@@ -15,6 +15,7 @@ import { getEncontros } from "../services/EncontroService";
 function Home() {
   const [encontros, setEncontros] = useState([]);
   const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef(null);
 
   useEffect(() => {
     const fetchEncontros = async () => {
@@ -30,6 +31,16 @@ function Home() {
     };
     fetchEncontros();
   }, []);
+
+  const scroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === "left" ? -350 : 350;
+      scrollContainerRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
 
   const calcularVagasOcupadas = (encontro) => {
     return encontro.inscricoes.reduce((total, insc) => {
@@ -84,33 +95,54 @@ function Home() {
               txt="Jogue com a gente! Gratuito e para todas."
             />
 
-            <div className="relative mt-4 flex w-full flex-col gap-4">
-              <div className="w-full flex gap-3 overflow-x-auto pb-4">
-                {loading && (
-                  <Loading cor="#BA1B31" txt="Buscando encontros..." />
-                )}
-                {!loading && encontros.length === 0 ? (
-                  <p>Não há encontros ativos.</p>
-                ) : (
-                  encontros.map((encontroItem, index) => {
-                    const vagasOcupadas = calcularVagasOcupadas(encontroItem);
-                    const isFull = vagasOcupadas >= encontroItem.totalVagas;
+            <div className="relative mt-4 flex w-full flex-col items-center gap-4">
+              <div className="relative w-full flex items-center justify-center">
+                <button
+                  onClick={() => scroll("left")}
+                  className="hidden md:block cursor-pointer absolute -left-16 top-1/2 -translate-y-1/2 z-10 p-2"
+                  aria-label="Rolar para a esquerda"
+                >
+                  <ChevronLeft className="size-10 text-gray-500" />
+                </button>
+                <div
+                  ref={scrollContainerRef}
+                  className="flex w-full gap-3 overflow-x-auto scroll-smooth pb-4"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  {loading && (
+                    <Loading cor="#BA1B31" txt="Buscando encontros..." />
+                  )}
+                  {!loading && encontros.length === 0 ? (
+                    <p>Não há encontros ativos.</p>
+                  ) : (
+                    encontros.map((encontroItem, index) => {
+                      const vagasOcupadas =
+                        calcularVagasOcupadas(encontroItem);
+                      const isFull = vagasOcupadas >= encontroItem.totalVagas;
 
-                    return (
-                      <Encontro
-                        key={index}
-                        id={encontroItem.id}
-                        nome={encontroItem.nome}
-                        diaI={encontroItem.diaI}
-                        diaF={encontroItem.diaF}
-                        vagas={encontroItem.totalVagas}
-                        atual={vagasOcupadas}
-                        isFull={isFull}
-                        encontro={false}
-                      />
-                    );
-                  })
-                )}
+                      return (
+                        <Encontro
+                          key={index}
+                          id={encontroItem.id}
+                          nome={encontroItem.nome}
+                          diaI={encontroItem.diaI}
+                          diaF={encontroItem.diaF}
+                          vagas={encontroItem.totalVagas}
+                          atual={vagasOcupadas}
+                          isFull={isFull}
+                          encontro={false}
+                        />
+                      );
+                    })
+                  )}
+                </div>
+                <button
+                  onClick={() => scroll("right")}
+                  className="hidden md:block cursor-pointer absolute -right-16 top-1/2 -translate-y-1/2 z-10 p-2"
+                  aria-label="Rolar para a direita"
+                >
+                  <ChevronRight className="size-10 text-gray-500" />
+                </button>
               </div>
               <div className="flex w-full justify-between">
                 <div className="flex max-w-1/2 flex-col gap-1 opacity-50">
@@ -200,3 +232,4 @@ function Home() {
 }
 
 export default Home;
+

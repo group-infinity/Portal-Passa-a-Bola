@@ -1,20 +1,23 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getEncontroById } from "../../services/EncontroService";
 import { ArrowLeft } from "lucide-react";
-import Loading from "../../components/utils/Loading"; // Import que faltava
 
+import Loading from "../../components/utils/Loading";
 import Banner from "../../components/home/Banner";
-import Chaveamento from "../../components/admin/Chaveamento"; // Import do novo componente
+import Chaveamento from "../../components/admin/Chaveamento";
+import TabelaParticipantes from "../../components/admin/TabelaParticipantes";
 
 const EncontroDetalhes = () => {
   const { id } = useParams();
   const [encontro, setEncontro] = useState(null);
+  const [participantes, setParticipantes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEncontro = async () => {
       try {
+        setLoading(true);
         const data = await getEncontroById(id);
         setEncontro(data);
       } catch (error) {
@@ -26,38 +29,37 @@ const EncontroDetalhes = () => {
     fetchEncontro();
   }, [id]);
 
-  const todosOsParticipantes = useMemo(() => {
-    if (!encontro) return [];
+  useEffect(() => {
+    if (!encontro) {
+        setParticipantes([]);
+        return;
+    };
 
     const listaAchatada = [];
     encontro.inscricoes.forEach((inscricao) => {
       if (inscricao.tipo === "individual") {
         listaAchatada.push({
           ...inscricao,
+          inscricao_id: inscricao.id,
+          jogadoraId: null,
           time: "Individual",
         });
-      } else if (inscricao.tipo === "conjunta") {
+      } else if (inscricao.tipo === "conjunta" && inscricao.membros) {
         inscricao.membros.forEach((membro) => {
           listaAchatada.push({
             ...membro,
+            inscricao_id: inscricao.id,
             time: inscricao.nomeTime,
           });
         });
       }
     });
-    return listaAchatada;
+    setParticipantes(listaAchatada);
   }, [encontro]);
-
-  // A função verifyLoading já está correta
-  const verifyLoading = () => {
-    if (loading) {
-      return <Loading cor="#981FBA" txt="Carregando detalhes do encontro..." />;
-    }
-  };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <Loading cor="#981FBA" txt="Carregando detalhes do encontro..." />
       </div>
     );
@@ -65,19 +67,32 @@ const EncontroDetalhes = () => {
 
   if (!encontro) {
     return (
-      <div className="mt-16 lg:mt-40 py-4">
-        <h1 className="text-center font-black text-5xl">Ops!</h1>
-        <p className="text-center mt-2.5">Encontro não encontrado.</p>
+      <div className="mt-16 py-4 lg:mt-40">
+        <h1 className="text-center text-5xl font-black">Ops!</h1>
+        <p className="mt-2.5 text-center">Encontro não encontrado.</p>
       </div>
     );
   }
 
-  const vagasOcupadas = todosOsParticipantes.length;
+  const vagasOcupadas = participantes.length;
 
   return (
     <div className="relative flex flex-col items-center pt-26 lg:pt-30">
-      <Banner img={"/images/sections/faixa-roxa.webp"} cor={"#981FBA"} txt={encontro.nome} />
+      <Banner
+        img={"/images/sections/faixa-roxa.webp"}
+        cor={"#981FBA"}
+        txt={encontro.nome}
+      />
       <div className="relative -top-5 mx-auto w-full p-6">
+        <div className="my-4 flex h-fit w-fit cursor-pointer items-center gap-1 self-start">
+          <ArrowLeft color="#981FBA" className="size-6" />
+          <Link
+            to="/admin/dashboard"
+            className="text-[#981FBA] hover:underline"
+          >
+            Voltar
+          </Link>
+        </div>
         <div className="mb-8 rounded-lg border bg-gray-50 p-4 shadow-md">
           <h2 className="mb-2 text-2xl font-bold">Resumo do Encontro</h2>
           <p>
@@ -92,80 +107,20 @@ const EncontroDetalhes = () => {
           </p>
         </div>
 
-        {/* Adicionando o componente de chaveamento */}
         <Chaveamento encontroId={id} />
 
         <div>
           <h2 className="mb-4 text-2xl font-bold">Lista de Participantes</h2>
-          {verifyLoading()}
-          {!loading && todosOsParticipantes.length === 0 ? (
-            <p>Não há pessoas cadastradas neste evento.</p>
+          {loading ? (
+             <Loading cor="#981FBA" txt="Carregando detalhes do encontro..." />
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-b-0 shadow-sm">
-              <table className="min-w-full bg-white text-sm">
-                <caption className="sr-only">
-                  Lista de participantes inscritos no encontro
-                </caption>
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th scope="col" className="px-4 py-2 text-left">
-                      Nome do Participante
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left">
-                      Email
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left">
-                      CPF
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left">
-                      Telefone
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left">
-                      Nascimento
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left">
-                      Time / Inscrição
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left">
-                      Foto do Documento
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left">
-                      Selfie Pessoal
-                    </th>
-                    <th scope="col" className="px-4 py-2 text-left">
-                      Posição Preferida
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {todosOsParticipantes.map((participante, index) => (
-                    <tr key={index} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-2">{participante.nome}</td>
-                      <td className="px-4 py-2">{participante.email}</td>
-                      <td className="px-4 py-2">{participante.cpf}</td>
-                      <td className="px-4 py-2">{participante.telefone}</td>
-                      <td className="px-4 py-2">
-                        {participante.dataNascimento}
-                      </td>
-                      <td className="px-4 py-2">{participante.time}</td>
-                      <td className="px-4 py-2 truncate max-w-[200px]">{participante.fotoDocumentoUrl}</td>
-                      <td className="px-4 py-2 truncate max-w-[200px]">{participante.selfiePessoalUrl}</td>
-                      <td className="px-4 py-2 capitalize">{participante.posicaoPreferida}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+             <TabelaParticipantes
+                participantes={participantes}
+                setParticipantes={setParticipantes}
+                nome={encontro.nome}
+                encontroId={id}
+            />
           )}
-        </div>
-        <div className="mt-4 flex h-fit w-fit cursor-pointer items-center gap-1 self-start">
-          <ArrowLeft color="#981FBA" className="size-6" />
-          <Link
-            to="/admin/dashboard"
-            className="text-[#981FBA] hover:underline"
-          >
-            Voltar
-          </Link>
         </div>
       </div>
     </div>

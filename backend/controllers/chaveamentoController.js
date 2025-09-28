@@ -1,13 +1,6 @@
 import { sql } from "@vercel/postgres";
 
-// Função para embaralhar um array
-const shuffleArray = (array) => {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-};
+// A função de embaralhar foi removida para garantir confrontos fixos.
 
 export const getChaveamento = async (req, res) => {
   const { id } = req.params;
@@ -26,9 +19,9 @@ export const getChaveamento = async (req, res) => {
     const encontro = encontros[0];
     const jogadorasPorTime = encontro.jogadorasPorTime;
 
-    // 2. Buscar todas as inscrições do encontro
+    // 2. Buscar todas as inscrições do encontro, ordenadas por ID para garantir consistência
     const { rows: inscricoes } = await sql`
-      SELECT * FROM inscricoes WHERE encontro_id = ${id}
+      SELECT * FROM inscricoes WHERE encontro_id = ${id} ORDER BY id ASC
     `;
 
     // 3. Separar times prontos de jogadoras individuais
@@ -46,22 +39,21 @@ export const getChaveamento = async (req, res) => {
       }
     });
 
-    // 4. Agrupar jogadoras individuais em novos times
+    // 4. Agrupar jogadoras individuais em novos times (sem embaralhar)
     const timesIndividuais = [];
-    const jogadorasEmbaralhadas = shuffleArray([...jogadorasIndividuais]);
 
-    for (let i = 0; i < jogadorasEmbaralhadas.length; i += jogadorasPorTime) {
-      const timeSlice = jogadorasEmbaralhadas.slice(i, i + jogadorasPorTime);
+    for (let i = 0; i < jogadorasIndividuais.length; i += jogadorasPorTime) {
+      const timeSlice = jogadorasIndividuais.slice(i, i + jogadorasPorTime);
       if (timeSlice.length === jogadorasPorTime) {
         timesIndividuais.push({
-          nome: `Time Avulso ${timesIndividuais.length + 1}`,
+          nome: `Time ${timesIndividuais.length + 1}`,
           membros: timeSlice
         });
       }
     }
 
-    // 5. Juntar todos os times e embaralhar a ordem
-    const todosOsTimes = shuffleArray([...timesProntos, ...timesIndividuais]);
+    // 5. Juntar todos os times em uma ordem fixa (sem embaralhar)
+    const todosOsTimes = [...timesProntos, ...timesIndividuais];
 
     // 6. Criar os confrontos (chaveamento)
     const chaveamento = [];
@@ -93,3 +85,4 @@ export const getChaveamento = async (req, res) => {
     res.status(500).json({ error: "Erro interno do servidor ao gerar chaveamento." });
   }
 };
+
