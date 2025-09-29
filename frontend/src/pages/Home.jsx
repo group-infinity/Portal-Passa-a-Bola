@@ -96,10 +96,10 @@ function Home() {
             />
 
             <div className="relative mt-4 flex w-full flex-col items-center gap-4">
-              <div className="relative w-full flex items-center justify-center">
+              <div className="relative flex w-full items-center justify-center">
                 <button
                   onClick={() => scroll("left")}
-                  className="hidden md:block cursor-pointer absolute -left-16 top-1/2 -translate-y-1/2 z-10 p-2"
+                  className="absolute top-1/2 -left-16 z-10 hidden -translate-y-1/2 cursor-pointer p-2 md:block"
                   aria-label="Rolar para a esquerda"
                 >
                   <ChevronLeft className="size-10 text-gray-500" />
@@ -116,8 +116,7 @@ function Home() {
                     <p>Não há encontros ativos.</p>
                   ) : (
                     encontros.map((encontroItem, index) => {
-                      const vagasOcupadas =
-                        calcularVagasOcupadas(encontroItem);
+                      const vagasOcupadas = calcularVagasOcupadas(encontroItem);
                       const isFull = vagasOcupadas >= encontroItem.totalVagas;
 
                       return (
@@ -138,7 +137,7 @@ function Home() {
                 </div>
                 <button
                   onClick={() => scroll("right")}
-                  className="hidden md:block cursor-pointer absolute -right-16 top-1/2 -translate-y-1/2 z-10 p-2"
+                  className="absolute top-1/2 -right-16 z-10 hidden -translate-y-1/2 cursor-pointer p-2 md:block"
                   aria-label="Rolar para a direita"
                 >
                   <ChevronRight className="size-10 text-gray-500" />
@@ -232,4 +231,3 @@ function Home() {
 }
 
 export default Home;
-

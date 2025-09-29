@@ -5,12 +5,14 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    setLoading(false);
   }, []);
 
   const login = (userData, userToken) => {
@@ -18,7 +20,6 @@ export const AuthProvider = ({ children }) => {
     setToken(userToken);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', userToken);
-    window.location.href = "/admin/dashboard";
   };
 
   const logout = () => {
@@ -26,16 +27,17 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    window.location.href = "/";
+    window.location.href = "/login"; // Redireciona para login ao sair
   };
 
   const isAdmin = user && user.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, token, isAdmin, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, token, isAdmin, login, logout, loading }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
+
