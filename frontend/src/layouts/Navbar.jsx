@@ -35,57 +35,68 @@ function Navbar() {
   const handleLogout = () => {
     setPopoutAberto(false);
     logout();
-  }
+  };
 
   const handlePerfilClick = () => {
     setPopoutAberto(false);
-    navigate(`/perfil/${user.id}`);
-  }
+    navigate(`/perfil/${user.nick}`);
+  };
 
   return (
     <header className="fixed z-50 flex h-16 w-screen items-center justify-between bg-[#981FBA] px-6 py-2.5 lg:h-20">
       <div className="flex gap-1">
         <Link to="/" aria-label="Página inicial do Passa a Bola">
-          <img src={"/images/logos/logo.webp"} alt="Logo do Passa a Bola" className="h-11" />
+          <img
+            src={"/images/logos/logo.webp"}
+            alt="Logo do Passa a Bola"
+            className="h-11"
+          />
         </Link>
       </div>
 
       <div className="flex items-center gap-2.5" ref={popoutRef}>
-          {user ? (
-            <button  onClick={() => setPopoutAberto(!popoutAberto)} title="Perfil" aria-label="Abrir menu do perfil">
-               <CircleUserRound
-                color="#ffffff"
-                className="size-6 cursor-pointer text-white lg:size-8"
-                aria-hidden="true"
-              />
-            </button>
-          ) : (
-            <Link to="/login" aria-label="Página de login">
-              <CircleUserRound
-                color="#ffffff"
-                className="size-6 cursor-pointer text-white lg:size-8"
-                aria-hidden="true"
-              />
-            </Link>
-          )}
+        {user ? (
+          <button
+            onClick={() => setPopoutAberto(!popoutAberto)}
+            title="Perfil"
+            aria-label="Abrir menu do perfil"
+          >
+            <CircleUserRound
+              color="#ffffff"
+              className="size-6 cursor-pointer text-white lg:size-8"
+              aria-hidden="true"
+            />
+          </button>
+        ) : (
+          <Link to="/login" aria-label="Página de login">
+            <CircleUserRound
+              color="#ffffff"
+              className="size-6 cursor-pointer text-white lg:size-8"
+              aria-hidden="true"
+            />
+          </Link>
+        )}
 
-          {/* Popout do Perfil */}
-          <div className="relative" >
+        {/* Popout do Perfil */}
+        <div className="relative">
           {user && popoutAberto && (
-            <div className="absolute right-0 mt-5 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+            <div className="ring-opacity-5 absolute right-0 mt-5 w-48 rounded-md bg-white shadow-lg ring-1 ring-black">
               <div>
                 <div className="px-4 py-2 text-sm text-gray-700">
-                  Olá, <span className="font-bold">{user.nome.split(" ")[0]}!</span>
+                  Olá,{" "}
+                  <span className="font-bold">
+                    {user && user.nome && user.nome.split(" ")[0]}!
+                  </span>
                 </div>
                 <button
                   onClick={handlePerfilClick}
-                  className="cursor-pointer block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-400"
+                  className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-400"
                 >
                   Perfil
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="cursor-pointer block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-400"
+                  className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-400"
                 >
                   Logout
                 </button>
@@ -136,7 +147,7 @@ function Navbar() {
             </button>
 
             <nav aria-label="Navegação principal" className="self-start">
-              <ul className="flex w-full flex-col gap-3.5  text-left text-2xl font-bold text-white uppercase">
+              <ul className="flex w-full flex-col gap-3.5 text-left text-2xl font-bold text-white uppercase">
                 {isAdmin && (
                   <div className="mb-20 flex flex-col gap-3.5">
                     <p className="text-sm">Controlo de Admin: </p>
@@ -159,13 +170,18 @@ function Navbar() {
                   </div>
                 )}
                 <li>
+                  <Link to="/" onClick={() => setMenuAberto(false)}>
+                    Página Inicial
+                  </Link>
+                </li>
+                <li>
                   <Link to="/encontros" onClick={() => setMenuAberto(false)}>
                     Próximos Encontros
                   </Link>
                 </li>
                 <li>
                   <Link to="/placares" onClick={() => setMenuAberto(false)}>
-                    Resultados
+                    Placares
                   </Link>
                 </li>
                 <li>
@@ -182,7 +198,7 @@ function Navbar() {
             </nav>
 
             <button aria-label="Alternar tema claro/escuro">
-              <SunDim className="size-8 text-white" aria-hidden="true" />
+              {/* <SunDim className="size-8 text-white" aria-hidden="true" /> */}
             </button>
           </>
         )}

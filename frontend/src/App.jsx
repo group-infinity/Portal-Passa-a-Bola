@@ -44,7 +44,7 @@ function App() {
             <Route path="/placares" element={<Placares />} />
             <Route path="/noticias" element={<Noticias />} />
             <Route path="/sobre" element={<Sobre />} />
-            <Route path="/perfil/:id" element={<Perfil />} />
+            <Route path="/perfil/:nick" element={<Perfil />} />
 
             {/* Rotas de Admin Protegidas */}
             <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

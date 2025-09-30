@@ -11,24 +11,35 @@ import { ExcelJS } from 'exceljs';
 import { saveAs } from 'file-saver';
 import { useAuth } from '../../context/AuthContext';
 import { deleteParticipante } from '../../services/EncontroService';
+import ConfirmModal from '../utils/ConfirmModal';
+import AvisoModal from '../utils/AvisoModal';
+
 
 const TabelaParticipantes = ({ participantes, nome, setParticipantes, encontroId }) => {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const { token } = useAuth();
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, onConfirm: () => {} });
+  const [avisoModal, setAvisoModal] = useState({ isOpen: false, title: '', body: '' });
+
+  const handleDeleteRequest = (inscricaoId, jogadoraId) => {
+    setConfirmModal({
+        isOpen: true,
+        onConfirm: () => handleDelete(inscricaoId, jogadoraId)
+    });
+  };
 
   const handleDelete = async (inscricaoId, jogadoraId) => {
-    if (!window.confirm("Tem certeza que deseja remover este participante?")) {
-        return;
-    }
     try {
         await deleteParticipante({ encontroId, inscricaoId, jogadoraId }, token);
         const novosParticipantes = participantes.filter(p => !(p.inscricao_id === inscricaoId && p.jogadoraId === jogadoraId));
         setParticipantes(novosParticipantes);
-        alert("Participante removido com sucesso!");
+        setAvisoModal({ isOpen: true, title: "Sucesso", body: "Participante removido com sucesso!"});
     } catch (error) {
         console.error("Erro ao deletar participante:", error);
-        alert(`Erro: ${error.message}`);
+        setAvisoModal({ isOpen: true, title: "Erro", body: error.message});
+    } finally {
+        setConfirmModal({isOpen: false, onConfirm: () => {}});
     }
   };
 
@@ -95,7 +106,7 @@ const TabelaParticipantes = ({ participantes, nome, setParticipantes, encontroId
             const participante = row.original;
             return (
                 <button
-                    onClick={() => handleDelete(participante.inscricao_id, participante.jogadoraId)}
+                    onClick={() => handleDeleteRequest(participante.inscricao_id, participante.jogadoraId)}
                     className="p-1 text-red-600 hover:text-red-800"
                     title="Remover participante"
                 >
@@ -178,6 +189,21 @@ const TabelaParticipantes = ({ participantes, nome, setParticipantes, encontroId
 
   return (
     <div>
+       <ConfirmModal
+            isOpen={confirmModal.isOpen}
+            onClose={() => setConfirmModal({isOpen: false, onConfirm: () => {}})}
+            onConfirm={confirmModal.onConfirm}
+            title="Confirmar Remoção"
+            txt="Tem certeza que deseja remover este participante?"
+        />
+        <AvisoModal
+            isOpen={avisoModal.isOpen}
+            onClose={() => setAvisoModal({ isOpen: false, title: '', body: '' })}
+            title={avisoModal.title}
+        >
+            <p>{avisoModal.body}</p>
+        </AvisoModal>
+
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
         <input
           type="text"

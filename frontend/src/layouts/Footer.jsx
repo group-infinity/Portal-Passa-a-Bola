@@ -20,7 +20,8 @@ function Footer() {
             <h4 className="text-white font-semibold !text-lg">Navegação</h4>
 
             <Link to="/encontros" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Próximos Encontros</Link>
-            <Link to="/placares" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Placares e Notícias</Link>
+            <Link to="/placares" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Placares</Link>
+            <Link to="/noticias" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Notícias</Link>
             <Link to="/sobre" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Sobre</Link>
           </div>
 

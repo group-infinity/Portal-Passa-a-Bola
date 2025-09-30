@@ -10,7 +10,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user from localStorage", e);
+        localStorage.removeItem('user');
+      }
     }
     setLoading(false);
   }, []);
@@ -30,14 +35,19 @@ export const AuthProvider = ({ children }) => {
     window.location.href = "/login"; // Redireciona para login ao sair
   };
 
+  // NOVA FUNÇÃO PARA ATUALIZAR DADOS DO UTILIZADOR NO CONTEXTO
+  const updateUser = (newUserData) => {
+    setUser(newUserData);
+    localStorage.setItem('user', JSON.stringify(newUserData));
+  }
+
   const isAdmin = user && user.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, token, isAdmin, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, isAdmin, login, logout, loading, updateUser }}>
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
-
