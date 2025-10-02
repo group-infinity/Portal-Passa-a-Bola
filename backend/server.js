@@ -4,6 +4,7 @@ import cors from "cors";
 import ligaRoutes from './routes/ligaRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import encontroRoutes from './routes/encontroRoutes.js';
+import monitorRoutes from './routes/monitorRoutes.js';
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use(express.json());
 app.use('/api', ligaRoutes);
 app.use('/api', authRoutes);
 app.use('/api', encontroRoutes);
+app.use('/api', monitorRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).send('O servidor está funcionando!');

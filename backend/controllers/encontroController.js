@@ -1,20 +1,18 @@
+import axios from "axios";
 import { sql } from "@vercel/postgres";
 import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 import { Resend } from "resend";
 import qrcode from "qrcode";
+import "dotenv/config";
 
 // Crie uma instância do Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Função modificada para aceitar dados únicos para o QR Code
+// Função de envio de email com QR Code
 const sendEmailWithQRCode = async (jogadora, encontroNome, qrCodeData) => {
   try {
-    // 1. Converte o objeto de dados únicos para uma string JSON
     const qrCodePayload = JSON.stringify(qrCodeData);
-    // console.log(`Gerando QR Code com o seguinte payload: ${qrCodePayload}`);
-
-    // 2. Gera o QR Code a partir da string JSON
     const qrCodeDataURL = await qrcode.toDataURL(qrCodePayload);
     const qrCodeBase64 = qrCodeDataURL.split("base64,")[1];
 
@@ -35,13 +33,12 @@ const sendEmailWithQRCode = async (jogadora, encontroNome, qrCodeData) => {
         },
       ],
     });
-
-    // console.log(`E-mail de confirmação enviado para ${jogadora.email}`);
   } catch (error) {
     console.error("Erro ao enviar o e-mail:", error);
   }
 };
 
+// Obter todos os encontros
 export const getAllEncontros = async (req, res) => {
   try {
     const { rows } = await sql`
@@ -86,6 +83,7 @@ export const getAllEncontros = async (req, res) => {
   }
 };
 
+// Obter encontro por ID
 export const getEncontroById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -107,6 +105,7 @@ export const getEncontroById = async (req, res) => {
   }
 };
 
+// Criar encontro
 export const createEncontro = async (req, res) => {
   const { nome, diaI, diaF, totalVagas, jogadorasPorTime } = req.body;
 
@@ -350,4 +349,3 @@ export const deleteParticipante = async (req, res) => {
       res.status(500).json({ error: "Erro interno do servidor." });
     }
   };
-
