@@ -61,7 +61,7 @@ function Home() {
           <source src="/passaabola.webm" type="video/webm" />
         </video>
 
-        <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/100 via-transparent to-black/100"></div>
+        <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/75 via-transparent to-black/75"></div>
 
         <div className="relative z-30 inline-grid h-full w-full p-6">
           <div className="w-full self-start text-white md:max-w-3/4">
@@ -106,33 +106,37 @@ function Home() {
                 </button>
                 <div
                   ref={scrollContainerRef}
-                  className="flex w-full gap-3 overflow-x-auto scroll-smooth pb-4"
+                  className="flex w-full justify-center gap-3 overflow-x-auto scroll-smooth pb-4"
                   style={{ scrollbarWidth: "none" }}
                 >
                   {loading && (
                     <Loading cor="#BA1B31" txt="Buscando encontros..." />
                   )}
+
                   {!loading && encontros.length === 0 ? (
                     <p>Não há encontros ativos.</p>
-                  ) : (
-                    encontros.map((encontroItem, index) => {
-                      const vagasOcupadas = calcularVagasOcupadas(encontroItem);
-                      const isFull = vagasOcupadas >= encontroItem.totalVagas;
+                  ) : !loading && (
+                    <div className="flex w-full">
+                      {encontros.map((encontroItem, index) => {
+                        const vagasOcupadas =
+                          calcularVagasOcupadas(encontroItem);
+                        const isFull = vagasOcupadas >= encontroItem.totalVagas;
 
-                      return (
-                        <Encontro
-                          key={index}
-                          id={encontroItem.id}
-                          nome={encontroItem.nome}
-                          diaI={encontroItem.diaI}
-                          diaF={encontroItem.diaF}
-                          vagas={encontroItem.totalVagas}
-                          atual={vagasOcupadas}
-                          isFull={isFull}
-                          encontro={false}
-                        />
-                      );
-                    })
+                        return (
+                          <Encontro
+                            key={index}
+                            id={encontroItem.id}
+                            nome={encontroItem.nome}
+                            diaI={encontroItem.diaI}
+                            diaF={encontroItem.diaF}
+                            vagas={encontroItem.totalVagas}
+                            atual={vagasOcupadas}
+                            isFull={isFull}
+                            encontro={false}
+                          />
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
                 <button

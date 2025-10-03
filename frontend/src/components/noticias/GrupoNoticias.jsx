@@ -1,6 +1,10 @@
 import Noticia from "./Noticia";
+import { useLocation } from "react-router-dom";
 
 function GrupoNoticias() {
+  const location = useLocation();
+  const isNewsPage = location.pathname === "/noticias";
+
   const dados = {
     noticias: [
       {
@@ -19,28 +23,28 @@ function GrupoNoticias() {
       {
         id: 2,
         fonte: {
-          nome: "Antenados no Futebol",
-          logoUrl: "/images/noticias/favicon.webp",
+          nome: "Globo Esporte",
+          logoUrl: "/images/noticias/favicon-ge.webp",
         },
         titulo:
-          "Com título do Santos, Brasileirão Feminino A2 se encerra com acesso de Botafogo, Atlético-MG e Fortaleza",
+          "Copa do Brasil Feminina 2025: veja classificados para semifinais",
         resumo:
-          "Santos e Botafogo se enfrentaram na Vila Belmiro na tarde deste sábado (30), com a equipe santista ficando com a taça após empate de 1 a 1.",
-        tempoPublicacao: "1 dia atrás",
-        imagemUrl: "/images/noticias/santos.webp",
+          "Duelos da próxima fase serão definidos por sorteio, que ainda não tem data marcada.",
+        tempoPublicacao: "7 dias atrás",
+        imagemUrl: "/images/noticias/ge-bg.webp",
       },
       {
         id: 3,
         fonte: {
-          nome: "Antenados no Futebol",
-          logoUrl: "/images/noticias/favicon.webp",
+          nome: "Globo Esporte",
+          logoUrl: "/images/noticias/favicon-ge.webp",
         },
         titulo:
-          "Com título do Santos, Brasileirão Feminino A2 se encerra com acesso de Botafogo, Atlético-MG e Fortaleza",
+          "Conheça Ana Morganti, promessa do Corinthians de 16 anos que já foi convocada para a Seleção",
         resumo:
-          "Santos e Botafogo se enfrentaram na Vila Belmiro na tarde deste sábado (30), com a equipe santista ficando com a taça após empate de 1 a 1.",
-        tempoPublicacao: "1 dia atrás",
-        imagemUrl: "/images/noticias/santos.webp",
+          "Jogadora chegou ao Timão com 13 anos e, recentemente, conquistou o Brasileirão Feminino Sub-17.",
+        tempoPublicacao: "7 dias atrás",
+        imagemUrl: "/images/noticias/ge-bg2.webp",
       },
     ],
   };
@@ -48,7 +52,7 @@ function GrupoNoticias() {
   const [noticia1, noticia2, noticia3] = dados.noticias;
 
   return (
-    <div className="flex h-min flex-col gap-4 lg:grid lg:grid-cols-4 lg:grid-rows-2 lg:gap-4">
+    <div className={isNewsPage ? "flex flex-col gap-4" : "flex h-min flex-col gap-4 lg:grid lg:grid-cols-4 lg:grid-rows-2 lg:gap-4"}>
       <div className="h-fit md:col-span-4">
         <Noticia
           key={noticia1.id}

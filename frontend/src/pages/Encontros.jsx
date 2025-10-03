@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getEncontros } from "../services/EncontroService";
-import Loading from "../components/utils/Loading"
+import Loading from "../components/utils/Loading";
 
 import Banner from "../components/home/Banner";
 import Encontro from "../components/home/Encontro";
