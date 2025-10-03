@@ -38,6 +38,61 @@ const sendEmailWithQRCode = async (jogadora, encontroNome, qrCodeData) => {
   }
 };
 
+// Função para validar CPF e data de nascimento com a API Hub do Desenvolvedor
+const validarCPFDataNascimento = async (cpf, dataNascimento) => {
+    const token = process.env.HUBDEV_KEY;
+
+    // Se o token não estiver configurado, pula a validação para não bloquear o desenvolvimento.
+    if (!token) {
+        console.warn("Atenção: Token da Hub do Desenvolvedor (HUBDEV_KEY) não configurado. Pulando a validação de CPF no backend.");
+        return { valido: true };
+    }
+
+    try {
+        const cpfLimpo = cpf.replace(/[^\d]/g, '');
+        const dataFormatadaParaApi = dataNascimento.replace(/\//g, '');
+
+        const response = await axios.get(`https://ws.hubdodesenvolvedor.com.br/v2/cpf/`, {
+            params: {
+                cpf: cpfLimpo,
+                data: dataFormatadaParaApi,
+                token: token
+            }
+        });
+
+        if (response.data.status === true && response.data.result) {
+            const apiDataNascimento = response.data.result.data_nascimento;
+
+            if (apiDataNascimento !== dataNascimento) {
+                return { valido: false, erro: 'A data de nascimento não corresponde ao CPF informado.' };
+            }
+
+            // Verificação de idade (maior de 18 anos)
+            const [dia, mes, ano] = dataNascimento.split('/').map(Number);
+            const dataNasc = new Date(ano, mes - 1, dia);
+            const hoje = new Date();
+            let idade = hoje.getFullYear() - dataNasc.getFullYear();
+            const m = hoje.getMonth() - dataNasc.getMonth();
+            if (m < 0 || (m === 0 && hoje.getDate() < dataNasc.getDate())) {
+                idade--;
+            }
+
+            if (idade < 18) {
+                return { valido: false, erro: 'A participante deve ser maior de 18 anos.' };
+            }
+
+            return { valido: true, dados: response.data.result };
+        } else {
+            const erroApi = response.data.return || "Dados inválidos ou não encontrados.";
+            return { valido: false, erro: erroApi };
+        }
+    } catch (error) {
+        console.error("Erro ao validar CPF na API Hub do Desenvolvedor:", error.response?.data || error.message);
+        const erroApi = error.response?.data?.return || "Não foi possível validar o CPF neste momento.";
+        return { valido: false, erro: erroApi };
+    }
+};
+
 // Obter todos os encontros
 export const getAllEncontros = async (req, res) => {
   try {
@@ -132,8 +187,9 @@ export const createInscricao = async (req, res) => {
     const { id: encontro_id } = req.params;
     const dados = req.body;
     const tipo = dados.tipo;
-    const files = req.files || []; // --- Lógica do Encontro e Vagas (Original) ---
+    const files = req.files || [];
 
+    // --- Lógica do Encontro e Vagas (Original) ---
     const { rows: encontros } = await sql`SELECT nome, "totalVagas", "jogadorasPorTime" FROM encontros WHERE id = ${encontro_id}`;
     if (encontros.length === 0) {
       return res.status(404).json({ error: "Encontro não encontrado." });
@@ -149,8 +205,26 @@ export const createInscricao = async (req, res) => {
     const vagasNecessarias = tipo === "individual" ? 1 : Array.isArray(dados.membros) ? dados.membros.length : 0;
     if (vagasOcupadas + vagasNecessarias > totalVagas) {
       return res.status(400).json({ error: "Inscrições esgotadas para este encontro!" });
-    } // --- Verificação de Emails Duplicados (Refatorada) ---
+    }
 
+    // --- Validação de CPF e Data de Nascimento ---
+    if (tipo === 'individual') {
+        const { cpf, dataNascimento } = dados;
+        const validacao = await validarCPFDataNascimento(cpf, dataNascimento);
+        if (!validacao.valido) {
+            return res.status(400).json({ error: `Para ${dados.nome}: ${validacao.erro}` });
+        }
+    } else if (tipo === 'conjunta' && Array.isArray(dados.membros)) {
+        for (const membro of dados.membros) {
+            const { cpf, dataNascimento } = membro;
+            const validacao = await validarCPFDataNascimento(cpf, dataNascimento);
+            if (!validacao.valido) {
+                return res.status(400).json({ error: `Para ${membro.nome}: ${validacao.erro}` });
+            }
+        }
+    }
+
+    // --- Verificação de Emails Duplicados (Refatorada) ---
     let emailsParaVerificar = [];
     if (tipo === "individual") {
         if (dados.email) emailsParaVerificar.push(dados.email);
@@ -349,3 +423,4 @@ export const deleteParticipante = async (req, res) => {
       res.status(500).json({ error: "Erro interno do servidor." });
     }
   };
+

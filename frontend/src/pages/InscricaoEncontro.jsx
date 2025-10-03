@@ -13,6 +13,20 @@ import Input from "../components/cadastro/Input";
 import Botao from "../components/cadastro/Botao";
 import AvisoModal from "../components/utils/AvisoModal";
 
+// Função para verificar se o usuário é maior de 18 anos
+const isOver18 = (dateString) => {
+  const [dia, mes, ano] = dateString.split("/").map(Number);
+  const dataNascimento = new Date(ano, mes - 1, dia);
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+  const m = hoje.getMonth() - dataNascimento.getMonth();
+  if (m < 0 || (m === 0 && hoje.getDate() < dataNascimento.getDate())) {
+    idade--;
+  }
+  return idade >= 18;
+};
+
+
 const fileSchema = z
   .any()
   .refine((files) => files?.length == 1, "Arquivo é obrigatório.")
@@ -32,15 +46,12 @@ const individualSchema = z.object({
   nome: z.string().min(3, "Nome completo é obrigatório"),
   email: z.string().email("E-mail inválido"),
   cpf: z
-    .string()
-    .regex(
-      /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
-      "CPF inválido (formato: 123.456.789-00)",
-    ),
+    .string(),
   telefone: z.string().min(10, "Telefone inválido"),
   dataNascimento: z
     .string()
-    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data inválida (formato: DD/MM/AAAA)"),
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data inválida (formato: DD/MM/AAAA)")
+    .refine(isOver18, { message: "Apenas maiores de 18 anos podem se inscrever." }),
   posicaoPreferida: z.enum(["gol", "defesa", "ataque"], {
     required_error: "Você precisa selecionar uma posição.",
   }),
@@ -52,15 +63,12 @@ const jogadoraSchema = z.object({
   nome: z.string().min(3, "Nome completo é obrigatório."),
   email: z.string().email("E-mail inválido."),
   cpf: z
-    .string()
-    .regex(
-      /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
-      "CPF inválido (formato: 123.456.789-00)",
-    ),
+    .string(),
   telefone: z.string().min(10, "Telefone inválido."),
   dataNascimento: z
     .string()
-    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data inválida (formato: DD/MM/AAAA)"),
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Data inválida (formato: DD/MM/AAAA)")
+    .refine(isOver18, { message: "Apenas maiores de 18 anos podem se inscrever." }),
   posicaoPreferida: z.enum(["gol", "defesa", "ataque"], {
     required_error: "Você precisa selecionar uma posição.",
   }),
@@ -193,6 +201,14 @@ function InscricaoEncontro() {
     const formData = new FormData();
     formData.append("tipo", tipoInscricao);
 
+    // Adiciona os dados de texto ao formData
+    Object.keys(data).forEach(key => {
+        if (key !== 'membros' && key !== 'fotoDocumento' && key !== 'selfiePessoal') {
+            formData.append(key, data[key]);
+        }
+    });
+
+
     // Função auxiliar para comprimir uma imagem
     const compressImage = async (file) => {
       if (!file) return null;
@@ -219,7 +235,6 @@ function InscricaoEncontro() {
     try {
       // Inscrição individual
       if (tipoInscricao === "individual") {
-        // ... outros campos
         if (data.fotoDocumento?.[0]) {
           const compressed = await compressImage(data.fotoDocumento[0]);
           formData.append("fotoDocumento", compressed);
@@ -231,8 +246,6 @@ function InscricaoEncontro() {
       }
       // Inscrição de time
       else if (tipoInscricao === "conjunta" && data.membros) {
-        // ... outros campos do time ...
-
         // Itera sobre os membros e comprime as imagens de cada um
         for (let i = 0; i < data.membros.length; i++) {
           const membro = data.membros[i];
@@ -258,12 +271,11 @@ function InscricaoEncontro() {
       await createInscricao(id, formData);
       setModalContent({
         title: "Inscrição Realizada com Sucesso!",
-        body: "A inscrição foi registrada. Futuramente, as jogadoras receberão uma confirmação por email, no qual também receberão um QR Code para permitir seu acesso ao encontro.",
-        imageUrl: "/qrCode.png",
+        body: "A inscrição foi registrada. As jogadoras receberão uma confirmação por email com um QR Code para acesso ao encontro.",
+        imageUrl: "/images/qrCode.png",
       });
       setOnModalClose(() => () => navigate("/encontros"));
       setIsModalOpen(true);
-      // ... resto da sua lógica de sucesso
     } catch (error) {
       setModalContent({
         title: "Erro na Inscrição",
@@ -272,7 +284,6 @@ function InscricaoEncontro() {
       });
       setOnModalClose(() => () => {});
       setIsModalOpen(true);
-      // ... resto da sua lógica de erro
     }
   };
 
