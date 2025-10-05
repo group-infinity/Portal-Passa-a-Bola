@@ -62,11 +62,16 @@ function Navbar() {
             title="Perfil"
             aria-label="Abrir menu do perfil"
           >
-            <CircleUserRound
+            <img
+              src={user.foto_perfil_url}
+              alt="Foto do usuário"
+              className="size-6 cursor-pointer rounded-full border-2 border-white lg:size-10"
+            />
+            {/* <CircleUserRound
               color="#ffffff"
               className="size-6 cursor-pointer text-white lg:size-8"
               aria-hidden="true"
-            />
+            /> */}
           </button>
         ) : (
           <Link to="/login" aria-label="Página de login">
@@ -152,7 +157,13 @@ function Navbar() {
                 {isAdmin && (
                   <div className="mb-20 flex flex-col gap-3.5">
                     <p className="text-sm">Controlo de Admin: </p>
-                    <li className={location.pathname === "/admin/dashboard" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
+                    <li
+                      className={
+                        location.pathname === "/admin/dashboard"
+                          ? "w-fit rounded-[3px] border-l-3 border-white pl-3"
+                          : ""
+                      }
+                    >
                       <Link
                         to="/admin/dashboard"
                         onClick={() => setMenuAberto(false)}
@@ -160,7 +171,13 @@ function Navbar() {
                         Painel
                       </Link>
                     </li>
-                    <li className={location.pathname === "/admin/criar-encontro" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
+                    <li
+                      className={
+                        location.pathname === "/admin/criar-encontro"
+                          ? "w-fit rounded-[3px] border-l-3 border-white pl-3"
+                          : ""
+                      }
+                    >
                       <Link
                         to="/admin/criar-encontro"
                         onClick={() => setMenuAberto(false)}
@@ -170,27 +187,57 @@ function Navbar() {
                     </li>
                   </div>
                 )}
-                <li className={location.pathname === "/" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
+                <li
+                  className={
+                    location.pathname === "/"
+                      ? "w-fit rounded-[3px] border-l-3 border-white pl-3"
+                      : ""
+                  }
+                >
                   <Link to="/" onClick={() => setMenuAberto(false)}>
                     Página Inicial
                   </Link>
                 </li>
-                <li className={location.pathname === "/encontros" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
+                <li
+                  className={
+                    location.pathname === "/encontros"
+                      ? "w-fit rounded-[3px] border-l-3 border-white pl-3"
+                      : ""
+                  }
+                >
                   <Link to="/encontros" onClick={() => setMenuAberto(false)}>
                     Próximos Encontros
                   </Link>
                 </li>
-                <li className={location.pathname === "/placares" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
+                <li
+                  className={
+                    location.pathname === "/placares"
+                      ? "w-fit rounded-[3px] border-l-3 border-white pl-3"
+                      : ""
+                  }
+                >
                   <Link to="/placares" onClick={() => setMenuAberto(false)}>
                     Placares
                   </Link>
                 </li>
-                <li className={location.pathname === "/noticias" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
+                <li
+                  className={
+                    location.pathname === "/noticias"
+                      ? "w-fit rounded-[3px] border-l-3 border-white pl-3"
+                      : ""
+                  }
+                >
                   <Link to="/noticias" onClick={() => setMenuAberto(false)}>
                     Notícias
                   </Link>
                 </li>
-                <li className={location.pathname === "/sobre" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
+                <li
+                  className={
+                    location.pathname === "/sobre"
+                      ? "w-fit rounded-[3px] border-l-3 border-white pl-3"
+                      : ""
+                  }
+                >
                   <Link to="/sobre" onClick={() => setMenuAberto(false)}>
                     Sobre
                   </Link>
