@@ -12,6 +12,7 @@ function GrupoNoticias() {
         fonte: {
           nome: "Antenados no Futebol",
           logoUrl: "/images/noticias/favicon.webp",
+          link: "https://www.antenadosnofutebol.com.br/futebol-feminino/com-titulo-do-santos-brasileirao-feminino-a2-se-encerra-com-acesso-de-botafogo-atletico-mg-e-fortaleza"
         },
         titulo:
           "Com título do Santos, Brasileirão Feminino A2 se encerra com acesso de Botafogo, Atlético-MG e Fortaleza",
@@ -25,6 +26,7 @@ function GrupoNoticias() {
         fonte: {
           nome: "Globo Esporte",
           logoUrl: "/images/noticias/favicon-ge.webp",
+          link: "https://ge.globo.com/sp/ribeirao-preto-e-regiao/futebol/futebol-feminino/copa-do-brasil-feminina/noticia/2025/09/25/copa-do-brasil-feminina-2025-veja-classificados-para-semifinais.ghtml"
         },
         titulo:
           "Copa do Brasil Feminina 2025: veja classificados para semifinais",
@@ -38,6 +40,7 @@ function GrupoNoticias() {
         fonte: {
           nome: "Globo Esporte",
           logoUrl: "/images/noticias/favicon-ge.webp",
+          link: "https://ge.globo.com/futebol/times/corinthians/noticia/2025/09/22/conheca-ana-morganti-promessa-do-corinthians-de-16-anos-que-ja-foi-convocada-para-a-selecao.ghtml"
         },
         titulo:
           "Conheça Ana Morganti, promessa do Corinthians de 16 anos que já foi convocada para a Seleção",
@@ -59,6 +62,7 @@ function GrupoNoticias() {
           {...noticia1}
           img={noticia1.imagemUrl}
           tempo={noticia1.tempoPublicacao}
+          link={noticia1.fonte.link}
         />
       </div>
 
@@ -68,6 +72,7 @@ function GrupoNoticias() {
           {...noticia2}
           img={noticia2.imagemUrl}
           tempo={noticia2.tempoPublicacao}
+          link={noticia2.fonte.link}
         />
       </div>
 
@@ -77,6 +82,7 @@ function GrupoNoticias() {
           {...noticia3}
           img={noticia3.imagemUrl}
           tempo={noticia3.tempoPublicacao}
+          link={noticia3.fonte.link}
         />
       </div>
     </div>
