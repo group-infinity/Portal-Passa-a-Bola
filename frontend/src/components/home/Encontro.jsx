@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-function Encontro({ id, nome, diaI, diaF, encontro, atual, vagas, isFull }) {
+function Encontro({ id, nome, diaI, diaF, encontro, atual, vagas, isFull, local }) {
   return (
     <div
       className={`rounded-[10px] ${encontro ? "max-w-full" : "max-w-[90%] md:max-w-[50%]"} flex h-fit w-full flex-shrink-0 flex-col gap-2 border-1 border-[rgba(0,0,0,0.25)] p-4`}
@@ -27,6 +27,12 @@ function Encontro({ id, nome, diaI, diaF, encontro, atual, vagas, isFull }) {
             <strong>Vagas restantes: </strong>
           <p>
             {`${atual}/${vagas}`}
+          </p>
+        </div>
+        <div className="flex justify-center gap-1 py-2">
+            <strong>Local: </strong>
+          <p>
+            {local}
           </p>
         </div>
       </div>

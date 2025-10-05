@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { SunDim, X, CircleUserRound, Menu, LogOut } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
@@ -9,6 +9,7 @@ function Navbar() {
   const [popoutAberto, setPopoutAberto] = useState(false);
   const popoutRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Efeito para fechar o popout se clicar fora dele
   useEffect(() => {
@@ -151,7 +152,7 @@ function Navbar() {
                 {isAdmin && (
                   <div className="mb-20 flex flex-col gap-3.5">
                     <p className="text-sm">Controlo de Admin: </p>
-                    <li>
+                    <li className={location.pathname === "/admin/dashboard" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
                       <Link
                         to="/admin/dashboard"
                         onClick={() => setMenuAberto(false)}
@@ -159,7 +160,7 @@ function Navbar() {
                         Painel
                       </Link>
                     </li>
-                    <li>
+                    <li className={location.pathname === "/admin/criar-encontro" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
                       <Link
                         to="/admin/criar-encontro"
                         onClick={() => setMenuAberto(false)}
@@ -169,27 +170,27 @@ function Navbar() {
                     </li>
                   </div>
                 )}
-                <li>
+                <li className={location.pathname === "/" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
                   <Link to="/" onClick={() => setMenuAberto(false)}>
                     Página Inicial
                   </Link>
                 </li>
-                <li>
+                <li className={location.pathname === "/encontros" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
                   <Link to="/encontros" onClick={() => setMenuAberto(false)}>
                     Próximos Encontros
                   </Link>
                 </li>
-                <li>
+                <li className={location.pathname === "/placares" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
                   <Link to="/placares" onClick={() => setMenuAberto(false)}>
                     Placares
                   </Link>
                 </li>
-                <li>
+                <li className={location.pathname === "/noticias" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
                   <Link to="/noticias" onClick={() => setMenuAberto(false)}>
                     Notícias
                   </Link>
                 </li>
-                <li>
+                <li className={location.pathname === "/sobre" ? "border-l-3 rounded-[3px] pl-3 border-white w-fit" : ""}>
                   <Link to="/sobre" onClick={() => setMenuAberto(false)}>
                     Sobre
                   </Link>

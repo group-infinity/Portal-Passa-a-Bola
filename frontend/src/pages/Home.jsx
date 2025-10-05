@@ -130,6 +130,7 @@ function Home() {
                             diaI={encontroItem.diaI}
                             diaF={encontroItem.diaF}
                             vagas={encontroItem.totalVagas}
+                            local={encontroItem.local}
                             atual={vagasOcupadas}
                             isFull={isFull}
                             encontro={false}

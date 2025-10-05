@@ -30,6 +30,7 @@ const encontroSchema = z
     diaF: z.string(),
     jogadorasPorTime: z.string(),
     totalVagas: z.string(),
+    local: z.string(),
   })
   .superRefine((data, ctx) => {
     if (data.nome.length < 3) {
@@ -92,6 +93,14 @@ const encontroSchema = z
           message: "O total de vagas deve ser maior que zero.",
         });
       }
+    }
+
+    if (!data.local || data.local.trim().length < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["local"],
+        message: "O local do encontro é obrigatório e deve ter pelo menos 3 caracteres.",
+      });
     }
   });
 
@@ -213,6 +222,13 @@ const CriarEncontro = () => {
                 placeholder="Ex: 40"
                 register={{ ...register("totalVagas") }}
                 error={errors.totalVagas}
+              />
+              <Input
+                label="Local do Encontro"
+                type="text"
+                placeholder="Ex: Estádio Municipal"
+                register={{ ...register("local") }}
+                error={errors.local}
               />
             </div>
             <Botao

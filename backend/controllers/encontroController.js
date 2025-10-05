@@ -98,7 +98,7 @@ export const getAllEncontros = async (req, res) => {
   try {
     const { rows } = await sql`
       SELECT
-        e.id, e.nome, e."diaI", e."diaF", e."totalVagas", e."jogadorasPorTime",
+        e.id, e.nome, e."diaI", e."diaF", e."totalVagas", e."jogadorasPorTime", e."local",
         i.id as inscricao_id, i.tipo, i.membros
       FROM encontros e
       LEFT JOIN inscricoes i ON e.id = i.encontro_id
@@ -115,6 +115,7 @@ export const getAllEncontros = async (req, res) => {
           diaF: row.diaF,
           totalVagas: row.totalVagas,
           jogadorasPorTime: row.jogadorasPorTime,
+          local: row.local,
           inscricoes: [],
         });
       }
@@ -142,7 +143,7 @@ export const getAllEncontros = async (req, res) => {
 export const getEncontroById = async (req, res) => {
   const { id } = req.params;
   try {
-    const { rows: encontros } = await sql`SELECT id, nome, "diaI", "diaF", "totalVagas", "jogadorasPorTime" FROM encontros WHERE id = ${id}`;
+    const { rows: encontros } = await sql`SELECT id, nome, "diaI", "diaF", "totalVagas", "jogadorasPorTime", "local" FROM encontros WHERE id = ${id}`;
 
     if (encontros.length === 0) {
       return res.status(404).json({ error: "Encontro não encontrado." });
@@ -162,16 +163,16 @@ export const getEncontroById = async (req, res) => {
 
 // Criar encontro
 export const createEncontro = async (req, res) => {
-  const { nome, diaI, diaF, totalVagas, jogadorasPorTime } = req.body;
+  const { nome, diaI, diaF, totalVagas, jogadorasPorTime, local } = req.body;
 
-  if (!nome || !diaI || !diaF || !totalVagas || !jogadorasPorTime) {
+  if (!nome || !diaI || !diaF || !totalVagas || !jogadorasPorTime || !local) {
     return res.status(400).json({ error: "Todos os campos são obrigatórios." });
   }
 
   try {
     const { rows } = await sql`
-      INSERT INTO encontros (nome, "diaI", "diaF", "totalVagas", "jogadorasPorTime")
-      VALUES (${nome}, ${diaI}, ${diaF}, ${totalVagas}, ${jogadorasPorTime})
+      INSERT INTO encontros (nome, "diaI", "diaF", "totalVagas", "jogadorasPorTime", local)
+      VALUES (${nome}, ${diaI}, ${diaF}, ${totalVagas}, ${jogadorasPorTime}, ${local})
       RETURNING *
     `;
     res.status(201).json(rows[0]);

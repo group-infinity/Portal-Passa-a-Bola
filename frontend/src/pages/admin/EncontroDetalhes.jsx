@@ -96,10 +96,16 @@ const EncontroDetalhes = () => {
         <div className="mb-8 rounded-lg border bg-gray-50 p-4 shadow-md">
           <h2 className="mb-2 text-2xl font-bold">Resumo do Encontro</h2>
           <p>
+            <strong>ID do Encontro:</strong> {encontro.id}
+          </p>
+          <p>
             <strong>Data de Início:</strong> {encontro.diaI}
           </p>
           <p>
             <strong>Fim das Inscrições:</strong> {encontro.diaF}
+          </p>
+          <p>
+            <strong>Local:</strong> {encontro.local}
           </p>
           <p>
             <strong>Vagas Preenchidas:</strong> {vagasOcupadas} de{" "}
