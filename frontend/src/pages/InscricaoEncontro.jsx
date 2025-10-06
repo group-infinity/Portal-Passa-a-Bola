@@ -186,16 +186,16 @@ function InscricaoEncontro() {
     reset(isIndividual ? {} : { membros: defaultMembers });
   }, [isIndividual, encontro, reset]);
 
-  useEffect(() => {
-    if (!loading) {
-      setModalContent({
-        title: "Aviso Importante!",
-        body: "Este é um projeto de demonstração. Os dados de inscrição, como nomes e CPFs, são temporários e serão resetados periodicamente devido à natureza do ambiente serverless utilizado e pelo funcionamento do Vercel. Nenhuma informação inserida aqui é armazenada permanentemente. Podem haver inconsistências na exibição de dados sobre as inscrições nas outras páginas do site.",
-        imageUrl: null,
-      });
-      setIsModalOpen(true);
-    }
-  }, [loading]);
+  // useEffect(() => {
+  //   if (!loading) {
+  //     setModalContent({
+  //       title: "Aviso Importante!",
+  //       body: "Este é um projeto de demonstração. Os dados de inscrição, como nomes e CPFs, são temporários e serão resetados periodicamente devido à natureza do ambiente serverless utilizado e pelo funcionamento do Vercel. Nenhuma informação inserida aqui é armazenada permanentemente. Podem haver inconsistências na exibição de dados sobre as inscrições nas outras páginas do site.",
+  //       imageUrl: null,
+  //     });
+  //     setIsModalOpen(true);
+  //   }
+  // }, [loading]);
 
   const onSubmit = async (data) => {
     const formData = new FormData();
