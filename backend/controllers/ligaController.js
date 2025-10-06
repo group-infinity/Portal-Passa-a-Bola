@@ -26,7 +26,7 @@ const fetchAndCache = async (endpoint, ttl) => {
 export const getAllLigas = async (req, res) => {
   try {
     const ligas = [
-      { id: 5201, nome: "Brasileirão Feminino" },
+      { id: 5704, nome: "Copa Libertadores Feminina" },
       { id: 4521, nome: "Liga Nacional de Futebol Feminino (NWSL - EUA)" },
       { id: 4887, nome: "Copa da Liga Feminina da FA" },
       { id: 4849, nome: "Superliga Feminina Inglesa" },
