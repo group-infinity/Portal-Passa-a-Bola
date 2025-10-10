@@ -65,6 +65,7 @@ function Home() {
           loop
           muted
           playsInline
+          controls={false}
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
         >
