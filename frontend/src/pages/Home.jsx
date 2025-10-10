@@ -16,6 +16,15 @@ function Home() {
   const [encontros, setEncontros] = useState([]);
   const [loading, setLoading] = useState(true);
   const scrollContainerRef = useRef(null);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(error => {
+        console.warn("A reprodução automática do vídeo foi bloqueada pelo navegador:", error);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const fetchEncontros = async () => {
@@ -56,6 +65,7 @@ function Home() {
           loop
           muted
           playsInline
+          ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
         >
           <source src="/passaabola.webm" type="video/webm" />
