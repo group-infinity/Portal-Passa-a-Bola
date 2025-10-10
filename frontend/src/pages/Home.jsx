@@ -59,6 +59,7 @@ function Home() {
           className="absolute inset-0 h-full w-full object-cover"
         >
           <source src="/passaabola.webm" type="video/webm" />
+          <source src="/passaabola.mp4" type="video/mp4" />
         </video>
 
         <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/75 via-transparent to-black/75"></div>
