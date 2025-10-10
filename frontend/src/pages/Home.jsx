@@ -61,16 +61,17 @@ function Home() {
     <div className="relative mt-16 flex flex-col items-center lg:mt-20">
       <section className="relative -z-999 h-[85lvh] w-full overflow-hidden">
         <video
+          controls={false}
           autoPlay
           loop
           muted
           playsInline
-          controls={false}
-          ref={videoRef}
-          className="absolute inset-0 h-full w-full object-cover"
+          poster="/images/sections/banner-roxo.webp"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
           <source src="/passaabola.webm" type="video/webm" />
           <source src="/passaabola.mp4" type="video/mp4" />
+          O seu navegador não suporta a tag de vídeo.
         </video>
 
         <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/75 via-transparent to-black/75"></div>
