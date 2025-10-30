@@ -70,7 +70,7 @@ const Perfil = () => {
       const data = await getUserProfileByNick(targetNick, token);
       setProfileData(data);
       setIsOwnProfile(user?.nick === data.nick);
-      reset(data); // Popula o formulário com os dados do perfil
+      reset(data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -89,14 +89,13 @@ const Perfil = () => {
   const handleEditToggle = () => {
     if (isOwnProfile) {
       setIsEditing(!isEditing);
-      reset(profileData); // Reseta o formulário para os valores atuais ao entrar/sair do modo de edição
+      reset(profileData);
     }
   };
 
   const onSubmit = async (formData) => {
     const data = new FormData();
 
-    // Adiciona apenas os campos que foram modificados
     Object.keys(formData).forEach(key => {
         if (formData[key] !== profileData[key]) {
             if (key === 'foto_perfil_url' && formData[key] && formData[key][0]) {
@@ -107,7 +106,6 @@ const Perfil = () => {
         }
     });
 
-    // Se não houver dados para enviar, apenas sai do modo de edição
     if (data.entries().next().done) {
         setIsEditing(false);
         return;
@@ -115,7 +113,7 @@ const Perfil = () => {
 
     try {
         const updatedUser = await updateUserProfile(user.id, data, token);
-        updateUser(updatedUser); // Atualiza o contexto global
+        updateUser(updatedUser);
         setProfileData(updatedUser);
         setIsEditing(false);
         setModalState({ isOpen: true, title: "Sucesso", body: "Perfil atualizado com sucesso!" });
@@ -157,7 +155,6 @@ const Perfil = () => {
         <div className="w-full px-6 md:max-w-[80%] lg:max-w-[70%]">
 
         {isEditing ? (
-        // MODO DE EDIÇÃO
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
              <div className="flex flex-col items-center gap-6 md:flex-row">
              {profileData.foto_perfil_url ? (
@@ -193,7 +190,6 @@ const Perfil = () => {
         </form>
         ) : (
 
-        // MODO DE VISUALIZAÇÃO
         <div className="space-y-8">
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                  <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left">
@@ -218,7 +214,6 @@ const Perfil = () => {
                 {renderInfoItem("Peso", profileData.peso, "kg")}
             </div>
 
-            {/* SEÇÃO DO DASHBOARD DE SAÚDE */}
             <div className="mt-12">
               <HealthDashboard userId={profileData.id} />
             </div>

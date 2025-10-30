@@ -32,10 +32,9 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    window.location.href = "/login"; // Redireciona para login ao sair
+    window.location.href = "/login";
   };
 
-  // NOVA FUNÇÃO PARA ATUALIZAR DADOS DO UTILIZADOR NO CONTEXTO
   const updateUser = (newUserData) => {
     setUser(newUserData);
     localStorage.setItem('user', JSON.stringify(newUserData));

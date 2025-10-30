@@ -6,10 +6,8 @@ import { Resend } from "resend";
 import qrcode from "qrcode";
 import "dotenv/config";
 
-// Crie uma instância do Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Função de envio de email com QR Code
 const sendEmailWithQRCode = async (jogadora, encontroNome, qrCodeData) => {
   try {
     const qrCodePayload = JSON.stringify(qrCodeData);
@@ -38,11 +36,9 @@ const sendEmailWithQRCode = async (jogadora, encontroNome, qrCodeData) => {
   }
 };
 
-// Função para validar CPF e data de nascimento com a API Hub do Desenvolvedor
 const validarCPFDataNascimento = async (cpf, dataNascimento) => {
     const token = process.env.HUBDEV_KEY;
 
-    // Se o token não estiver configurado, pula a validação para não bloquear o desenvolvimento.
     if (!token) {
         console.warn("Atenção: Token da Hub do Desenvolvedor (HUBDEV_KEY) não configurado. Pulando a validação de CPF no backend.");
         return { valido: true };
@@ -67,7 +63,6 @@ const validarCPFDataNascimento = async (cpf, dataNascimento) => {
                 return { valido: false, erro: 'A data de nascimento não corresponde ao CPF informado.' };
             }
 
-            // Verificação de idade (maior de 18 anos)
             const [dia, mes, ano] = dataNascimento.split('/').map(Number);
             const dataNasc = new Date(ano, mes - 1, dia);
             const hoje = new Date();
@@ -93,7 +88,6 @@ const validarCPFDataNascimento = async (cpf, dataNascimento) => {
     }
 };
 
-// Obter todos os encontros
 export const getAllEncontros = async (req, res) => {
   try {
     const { rows } = await sql`
@@ -139,7 +133,6 @@ export const getAllEncontros = async (req, res) => {
   }
 };
 
-// Obter encontro por ID
 export const getEncontroById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -161,7 +154,6 @@ export const getEncontroById = async (req, res) => {
   }
 };
 
-// Criar encontro
 export const createEncontro = async (req, res) => {
   const { nome, diaI, diaF, totalVagas, jogadorasPorTime, local } = req.body;
 
@@ -182,7 +174,6 @@ export const createEncontro = async (req, res) => {
   }
 };
 
-// Substitua TODA a sua função createInscricao por esta:
 export const createInscricao = async (req, res) => {
   try {
     const { id: encontro_id } = req.params;
@@ -190,7 +181,6 @@ export const createInscricao = async (req, res) => {
     const tipo = dados.tipo;
     const files = req.files || [];
 
-    // --- Lógica do Encontro e Vagas (Original) ---
     const { rows: encontros } = await sql`SELECT nome, "totalVagas", "jogadorasPorTime" FROM encontros WHERE id = ${encontro_id}`;
     if (encontros.length === 0) {
       return res.status(404).json({ error: "Encontro não encontrado." });
@@ -208,24 +198,28 @@ export const createInscricao = async (req, res) => {
       return res.status(400).json({ error: "Inscrições esgotadas para este encontro!" });
     }
 
-    // --- Validação de CPF e Data de Nascimento ---
+    const validacoes = [];
     if (tipo === 'individual') {
-        const { cpf, dataNascimento } = dados;
-        const validacao = await validarCPFDataNascimento(cpf, dataNascimento);
-        if (!validacao.valido) {
-            return res.status(400).json({ error: `Para ${dados.nome}: ${validacao.erro}` });
-        }
+        const { cpf, dataNascimento, nome } = dados;
+        validacoes.push({ cpf, dataNascimento, nome });
     } else if (tipo === 'conjunta' && Array.isArray(dados.membros)) {
-        for (const membro of dados.membros) {
-            const { cpf, dataNascimento } = membro;
-            const validacao = await validarCPFDataNascimento(cpf, dataNascimento);
-            if (!validacao.valido) {
-                return res.status(400).json({ error: `Para ${membro.nome}: ${validacao.erro}` });
-            }
-        }
+        dados.membros.forEach(membro => {
+            validacoes.push({ cpf: membro.cpf, dataNascimento: membro.dataNascimento, nome: membro.nome });
+        });
     }
 
-    // --- Verificação de Emails Duplicados (Refatorada) ---
+    const resultadosValidacao = await Promise.all(
+        validacoes.map(async ({ cpf, dataNascimento, nome }) => {
+            const validacao = await validarCPFDataNascimento(cpf, dataNascimento);
+            return { ...validacao, nome };
+        })
+    );
+
+    const validacaoFalhou = resultadosValidacao.find(v => !v.valido);
+    if (validacaoFalhou) {
+        return res.status(400).json({ error: `Para ${validacaoFalhou.nome}: ${validacaoFalhou.erro}` });
+    }
+
     let emailsParaVerificar = [];
     if (tipo === "individual") {
         if (dados.email) emailsParaVerificar.push(dados.email);
@@ -239,19 +233,15 @@ export const createInscricao = async (req, res) => {
 
     const emailsUnicos = [...new Set(emailsParaVerificar.filter(email => email && typeof email === 'string' && email.trim() !== ''))];
     if (emailsUnicos.length > 0) {
-        const { rows: duplicatasIndividuais } = await sql`
+        const { rows: duplicatas } = await sql`
             SELECT email FROM inscricoes
             WHERE encontro_id = ${encontro_id} AND tipo = 'individual' AND email = ANY(${emailsUnicos})
-        `;
-        if (duplicatasIndividuais.length > 0) {
-            return res.status(400).json({ error: `O email '${duplicatasIndividuais[0].email}' já está inscrito neste encontro.` });
-        }
-        const { rows: duplicatasConjuntas } = await sql`
+            UNION
             SELECT value->>'email' as email FROM inscricoes, jsonb_array_elements(membros)
             WHERE encontro_id = ${encontro_id} AND tipo = 'conjunta' AND value->>'email' = ANY(${emailsUnicos})
         `;
-        if (duplicatasConjuntas.length > 0) {
-            return res.status(400).json({ error: `O email '${duplicatasConjuntas[0].email}' já está inscrito neste encontro.` });
+        if (duplicatas.length > 0) {
+            return res.status(400).json({ error: `O email '${duplicatas[0].email}' já está inscrito neste encontro.` });
         }
     }
 
@@ -263,7 +253,7 @@ export const createInscricao = async (req, res) => {
         contentType: file.mimetype,
       });
       return blob.url;
-    }; // --- Inscrição Individual (Original, sem alterações) ---
+    };
 
     if (tipo === "individual") {
       const { nome, email, cpf, telefone, dataNascimento, posicaoPreferida } = dados;
@@ -276,9 +266,7 @@ export const createInscricao = async (req, res) => {
       const qrCodeData = { inscricaoId, encontroId: encontro_id, nome, email, cpf };
       await sendEmailWithQRCode({ nome, email }, encontroNome, qrCodeData);
     }
-    // --- Inscrição Conjunta (BLOCO TOTALMENTE CORRIGIDO) ---
     else if (tipo === "conjunta") {
-      // Passo 1: Juntar os dados de texto e os arquivos em um único array
       const membrosDeTexto = Array.isArray(dados.membros) ? dados.membros : [];
       const arquivosMap = new Map();
       files.forEach((file) => {
@@ -295,7 +283,6 @@ export const createInscricao = async (req, res) => {
         selfiePessoal: arquivosMap.get(`${index}_selfiePessoal`),
       }));
 
-      // Passo 2: Fazer o upload e criar o objeto final para o banco de dados
       const membrosComUrl = await Promise.all(
         membrosArray.map(async (membro) => {
           const fotoDocumentoUrl = await uploadFile(membro.fotoDocumento);
@@ -314,9 +301,7 @@ export const createInscricao = async (req, res) => {
         })
       );
 
-      // Passo 3: Inserir no banco de dados
       const membrosJSON = JSON.stringify(membrosComUrl);
-      // Pega o primeiro item caso o body-parser tenha criado um array
       const nomeTime = Array.isArray(dados.nomeTime) ? dados.nomeTime[0] : dados.nomeTime;
       const responsavel = Array.isArray(dados.responsavel) ? dados.responsavel[0] : dados.responsavel;
       const emailResponsavel = Array.isArray(dados.emailResponsavel) ? dados.emailResponsavel[0] : dados.emailResponsavel;
@@ -327,8 +312,7 @@ export const createInscricao = async (req, res) => {
             RETURNING id`;
       const inscricaoTimeId = rows[0].id;
 
-      // Passo 4: Enviar e-mails
-      for (const membro of membrosComUrl) {
+      const emailPromises = membrosComUrl.map((membro, index) => {
         const qrCodeData = {
           inscricaoId: inscricaoTimeId,
           jogadoraId: membro.jogadoraId,
@@ -338,9 +322,24 @@ export const createInscricao = async (req, res) => {
           email: membro.email,
           cpf: membro.cpf,
         };
-        await sendEmailWithQRCode(membro, encontroNome, qrCodeData);
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
+        return new Promise(resolve => setTimeout(resolve, 250 * index))
+          .then(() => sendEmailWithQRCode(membro, encontroNome, qrCodeData));
+      });
+
+      Promise.allSettled(emailPromises)
+        .then(results => {
+          results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+              console.error(
+                `Erro ao enviar email para ${membrosComUrl[index].nome} (encontro ID: ${encontro_id}, inscrição ID: ${inscricaoTimeId}):`,
+                result.reason
+              );
+            }
+          });
+        })
+        .catch(error => {
+          console.error(`Erro inesperado ao processar envio de emails (encontro ID: ${encontro_id}):`, error);
+        });
     }
 
     res.status(201).json({ message: "Inscrição realizada com sucesso!" });
@@ -373,7 +372,6 @@ export const deleteEncontro = async (req, res) => {
   }
 };
 
-// NOVA FUNÇÃO PARA DELETAR PARTICIPANTE
 export const deleteParticipante = async (req, res) => {
     const { encontroId, inscricaoId, jogadoraId } = req.body;
 
@@ -391,7 +389,6 @@ export const deleteParticipante = async (req, res) => {
       const inscricao = inscricoes[0];
 
       if (inscricao.tipo === 'individual') {
-        // Se for individual, deleta a inscrição inteira
         await sql`DELETE FROM inscricoes WHERE id = ${inscricaoId}`;
         return res.status(200).json({ message: "Participante removido com sucesso." });
       }
@@ -400,7 +397,6 @@ export const deleteParticipante = async (req, res) => {
         if (!jogadoraId) {
             return res.status(400).json({ error: "ID da jogadora é obrigatório para remover de um time." });
         }
-        // Se for de time, remove apenas o membro do array JSONB
         const membrosAtuais = inscricao.membros || [];
         const novosMembros = membrosAtuais.filter(m => m.jogadoraId !== jogadoraId);
 
@@ -408,7 +404,6 @@ export const deleteParticipante = async (req, res) => {
             return res.status(404).json({ error: "Jogadora não encontrada na inscrição." });
         }
 
-        // Se o time ficar vazio após a remoção, deleta a inscrição inteira
         if (novosMembros.length === 0) {
             await sql`DELETE FROM inscricoes WHERE id = ${inscricaoId}`;
         } else {

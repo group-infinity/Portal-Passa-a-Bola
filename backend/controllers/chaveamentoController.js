@@ -1,12 +1,9 @@
 import { sql } from "@vercel/postgres";
 
-// A função de embaralhar foi removida para garantir confrontos fixos.
-
 export const getChaveamento = async (req, res) => {
   const { id } = req.params;
 
   try {
-    // 1. Buscar o encontro e suas configurações
     const { rows: encontros } = await sql`
       SELECT "totalVagas", "jogadorasPorTime"
       FROM encontros
@@ -19,12 +16,10 @@ export const getChaveamento = async (req, res) => {
     const encontro = encontros[0];
     const jogadorasPorTime = encontro.jogadorasPorTime;
 
-    // 2. Buscar todas as inscrições do encontro, ordenadas por ID para garantir consistência
     const { rows: inscricoes } = await sql`
       SELECT * FROM inscricoes WHERE encontro_id = ${id} ORDER BY id ASC
     `;
 
-    // 3. Separar times prontos de jogadoras individuais
     const timesProntos = [];
     const jogadorasIndividuais = [];
 
@@ -39,7 +34,6 @@ export const getChaveamento = async (req, res) => {
       }
     });
 
-    // 4. Agrupar jogadoras individuais em novos times (sem embaralhar)
     const timesIndividuais = [];
 
     for (let i = 0; i < jogadorasIndividuais.length; i += jogadorasPorTime) {
@@ -52,10 +46,8 @@ export const getChaveamento = async (req, res) => {
       }
     }
 
-    // 5. Juntar todos os times em uma ordem fixa (sem embaralhar)
     const todosOsTimes = [...timesProntos, ...timesIndividuais];
 
-    // 6. Criar os confrontos (chaveamento)
     const chaveamento = [];
     for (let i = 0; i < todosOsTimes.length; i += 2) {
       if (todosOsTimes[i + 1]) {
@@ -65,7 +57,6 @@ export const getChaveamento = async (req, res) => {
           timeB: todosOsTimes[i + 1],
         });
       } else {
-        // Se houver um número ímpar de times, o último time fica "de bye"
         chaveamento.push({
           jogo: (i / 2) + 1,
           timeA: todosOsTimes[i],

@@ -13,7 +13,7 @@ import Encontros from "./pages/Encontros";
 import Placares from "./pages/Placares";
 import Noticias from "./pages/Noticias";
 import Sobre from "./pages/Sobre";
-import Perfil from "./pages/user/Perfil"; // Import da nova página
+import Perfil from "./pages/user/Perfil";
 
 import CriarEncontro from "./pages/admin/CriarEncontro";
 import InscricaoEncontro from "./pages/InscricaoEncontro";
@@ -21,10 +21,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import EncontroDetalhes from "./pages/admin/EncontroDetalhes";
 
 
-// Componente para proteger rotas de admin
 const AdminRoute = ({ children }) => {
     const { isAdmin, loading } = useAuth();
-    if (loading) return null; // ou um spinner
+    if (loading) return null;
     return isAdmin ? children : <Navigate to="/login" />;
 };
 

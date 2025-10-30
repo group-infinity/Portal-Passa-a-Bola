@@ -1,6 +1,5 @@
 import { sql } from "@vercel/postgres";
 
-// Função para adicionar novos dados de saúde
 export const addHealthData = async (req, res) => {
   const { userId, bpm, saturation } = req.body;
 
@@ -20,7 +19,6 @@ export const addHealthData = async (req, res) => {
   }
 };
 
-// Função para obter o histórico de dados de saúde de um usuário
 export const getHealthData = async (req, res) => {
   const { userId } = req.params;
 
@@ -32,7 +30,6 @@ export const getHealthData = async (req, res) => {
       ORDER BY timestamp DESC
       LIMIT 20;
     `;
-    // Invertemos para que o gráfico mostre do mais antigo para o mais recente
     res.status(200).json(rows.reverse());
   } catch (error) {
     console.error("Erro ao buscar dados de saúde:", error);

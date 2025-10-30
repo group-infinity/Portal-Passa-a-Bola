@@ -1,7 +1,5 @@
-// URL para a API do portal principal (Node.js)
 const PORTAL_API_URL = `${import.meta.env.VITE_API_URL}api/monitor`;
 
-// URL para a API de controlo do monitor (Python/Flask)
 const MONITOR_CONTROL_API_URL = 'http://localhost:5001/api';
 
 export const getHealthDataByUserId = async (userId, token) => {

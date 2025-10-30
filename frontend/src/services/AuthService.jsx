@@ -1,6 +1,5 @@
 const API_URL = `${import.meta.env.VITE_API_URL}api`;
 
-// NOVA FUNÇÃO DE REGISTO
 export const registerUser = async (userData) => {
   const response = await fetch(`${API_URL}/register`, {
     method: 'POST',
@@ -32,7 +31,6 @@ export const loginUser = async (credentials) => {
   return result;
 };
 
-// FUNÇÃO PARA PROCURAR PERFIL POR NICK
 export const getUserProfileByNick = async (nick, token) => {
     const response = await fetch(`${API_URL}/profile/${nick}`, {
       headers: {
@@ -48,7 +46,6 @@ export const getUserProfileByNick = async (nick, token) => {
     return await response.json();
 };
 
-// NOVA FUNÇÃO PARA ATUALIZAR O PERFIL
 export const updateUserProfile = async (formData, token) => {
     const response = await fetch(`${API_URL}/profile`, {
       method: 'PUT',

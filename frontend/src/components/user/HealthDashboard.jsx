@@ -5,7 +5,6 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { HeartPulse, Droplets, Zap, Timer } from 'lucide-react';
 import Loading from '../utils/Loading';
 
-// Componente para o cartão de estatísticas
 const StatCard = ({ icon, title, value, unit, colorClass }) => (
     <div className={`flex flex-col rounded-lg border bg-white p-4 shadow-sm ${colorClass}`}>
       <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-500">
@@ -19,7 +18,6 @@ const StatCard = ({ icon, title, value, unit, colorClass }) => (
     </div>
 );
 
-// Componente para o tooltip personalizado do gráfico
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -33,7 +31,6 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-// Componente para o Resumo da Sessão
 const SessionSummary = ({ sessionData }) => {
     if (!sessionData || sessionData.length < 2) {
         return (
@@ -146,7 +143,7 @@ const HealthDashboard = ({ userId }) => {
                     setLastUpdateTime(Date.now());
                     if (!isMonitoring) {
                         setIsMonitoring(true);
-                        setSessionData([]); // Limpa o resumo anterior ao receber novos dados
+                        setSessionData([]); 
                     }
                 }
             } catch (err) {

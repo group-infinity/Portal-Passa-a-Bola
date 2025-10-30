@@ -11,7 +11,6 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Efeito para fechar o popout se clicar fora dele
   useEffect(() => {
     function handleClickFora(event) {
       if (popoutRef.current && !popoutRef.current.contains(event.target)) {
@@ -24,7 +23,6 @@ function Navbar() {
     };
   }, [popoutRef]);
 
-  // Efeito para controlar o scroll do body quando o menu lateral está aberto
   useEffect(() => {
     if (menuAberto) {
       document.body.style.overflow = "hidden";

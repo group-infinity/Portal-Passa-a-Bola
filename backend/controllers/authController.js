@@ -6,7 +6,6 @@ import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 
 
-// FUNÇÃO DE REGISTO DE UTILIZADOR
 export const register = async (req, res) => {
   const { nome, email, senha, nick } = req.body;
 
@@ -15,7 +14,6 @@ export const register = async (req, res) => {
   }
 
   try {
-    // Verifica se o utilizador já existe
     const { rows: existingUsers } = await sql`SELECT * FROM users WHERE email = ${email}`;
     const { rows: existingNick } = await sql`SELECT * FROM users WHERE nick = ${nick}`;
 
@@ -26,11 +24,9 @@ export const register = async (req, res) => {
       return res.status(409).json({ error: "Este username já está registado." });
     }
 
-    // Criptografa a palavra-passe
     const salt = await bcrypt.genSalt(12);
     const senhaHash = await bcrypt.hash(senha, salt);
 
-    // Insere o novo utilizador na base de dados
     const { rows } = await sql`
       INSERT INTO users (nome, email, senha, nick)
       VALUES (${nome}, ${email}, ${senhaHash}, ${nick})
@@ -44,7 +40,6 @@ export const register = async (req, res) => {
   }
 };
 
-// FUNÇÃO DE LOGIN ATUALIZADA
 export const login = async (req, res) => {
   const { nick, senha } = req.body;
 
@@ -53,7 +48,6 @@ export const login = async (req, res) => {
   }
 
   try {
-    // Procura o utilizador pelo e-mail
     const { rows } = await sql`SELECT * FROM users WHERE nick = ${nick}`;
     const user = rows[0];
 
@@ -61,19 +55,16 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: "Credenciais inválidas." });
     }
 
-    // Compara a palavra-passe fornecida com a palavra-passe armazenada
     const isMatch = await bcrypt.compare(senha, user.senha);
     if (!isMatch) {
       return res.status(401).json({ error: "Credenciais inválidas." });
     }
 
-    // Define opções de expiração do token com base na role
     const tokenOptions = {};
     if (user.role === 'admin') {
-      tokenOptions.expiresIn = '8h'; // Token de Admin expira em 8 horas
+      tokenOptions.expiresIn = '8h'
     }
 
-    // Gera o token JWT
     const token = jwt.sign(
         { id: user.id, role: user.role },
         process.env.JWT_SECRET,
@@ -101,7 +92,6 @@ export const login = async (req, res) => {
   }
 };
 
-// FUNÇÃO PARA PROCURAR PERFIL DO UTILIZADOR
 export const getUserProfile = async (req, res) => {
   try {
     const nick = req.params.nick;
@@ -117,7 +107,6 @@ export const getUserProfile = async (req, res) => {
 };
 
 
-// NOVA FUNÇÃO PARA ATUALIZAR O PERFIL DO UTILIZADOR
 export const updateUserProfile = async (req, res) => {
     const userId = req.user.id;
     const { nome, nick, email, altura, peso, posicaoPreferida } = req.body;
@@ -126,7 +115,6 @@ export const updateUserProfile = async (req, res) => {
     try {
       let fotoPerfilUrl = null;
 
-      // Se um arquivo de imagem for enviado, faz o upload para o Vercel Blob
       if (file) {
         const blob = await put(`${uuidv4()}-${file.originalname}`, file.buffer, {
           access: "public",
@@ -135,29 +123,45 @@ export const updateUserProfile = async (req, res) => {
         fotoPerfilUrl = blob.url;
       }
 
-      // --- Lógica de atualização ---
-      // Pega os dados atuais do usuário para evitar sobrescrever com null/undefined
       const { rows: existingUsers } = await sql`SELECT * FROM users WHERE id = ${userId}`;
       if (existingUsers.length === 0) {
         return res.status(404).json({ error: "Utilizador não encontrado." });
       }
       const currentUser = existingUsers[0];
 
-      // Verifica se o novo email ou nick já estão em uso por outro utilizador
+      const checksToPerform = [];
       if (email && email !== currentUser.email) {
-          const { rows: emailCheck } = await sql`SELECT id FROM users WHERE email = ${email} AND id != ${userId}`;
-          if (emailCheck.length > 0) {
-              return res.status(409).json({ error: 'Este e-mail já está em uso.' });
-          }
+          checksToPerform.push({ field: 'email', value: email, message: 'Este e-mail já está em uso.' });
       }
       if (nick && nick !== currentUser.nick) {
-          const { rows: nickCheck } = await sql`SELECT id FROM users WHERE nick = ${nick} AND id != ${userId}`;
-          if (nickCheck.length > 0) {
-              return res.status(409).json({ error: 'Este nome de utilizador já está em uso.' });
+          checksToPerform.push({ field: 'nick', value: nick, message: 'Este nome de utilizador já está em uso.' });
+      }
+
+      if (checksToPerform.length === 2) {
+          const { rows: duplicateCheck } = await sql`
+              SELECT email, nick FROM users
+              WHERE (email = ${email} OR nick = ${nick}) AND id != ${userId}
+          `;
+
+          for (const duplicate of duplicateCheck) {
+              if (duplicate.email === email) {
+                  return res.status(409).json({ error: 'Este e-mail já está em uso.' });
+              }
+              if (duplicate.nick === nick) {
+                  return res.status(409).json({ error: 'Este nome de utilizador já está em uso.' });
+              }
+          }
+      } else if (checksToPerform.length === 1) {
+          const check = checksToPerform[0];
+          const { rows: duplicateCheck } = check.field === 'email'
+              ? await sql`SELECT id FROM users WHERE email = ${check.value} AND id != ${userId}`
+              : await sql`SELECT id FROM users WHERE nick = ${check.value} AND id != ${userId}`;
+
+          if (duplicateCheck.length > 0) {
+              return res.status(409).json({ error: check.message });
           }
       }
 
-      // Monta a query de atualização dinamicamente
       const fieldsToUpdate = [];
       const values = [];
       let queryIndex = 1;
@@ -171,7 +175,6 @@ export const updateUserProfile = async (req, res) => {
       if (fotoPerfilUrl) { fieldsToUpdate.push(`foto_perfil_url = $${queryIndex++}`); values.push(fotoPerfilUrl); }
 
       if (fieldsToUpdate.length === 0) {
-        // Se só a foto foi enviada mas não entrou na condição acima, busca o usuário e retorna
         if(fotoPerfilUrl) {
             const { rows } = await sql`SELECT id, nome, email, role, nick, altura, peso, posicao_preferida, foto_perfil_url FROM users WHERE id = ${userId}`;
             return res.status(200).json({
