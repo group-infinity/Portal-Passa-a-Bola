@@ -1,8 +1,6 @@
 import { Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import Logo from "../assets/logo.webp";
-
 function Footer() {
   return (
     <footer className="bg-[#6EAA38] text-white">
@@ -10,7 +8,7 @@ function Footer() {
 
         <div className="flex flex-col md:flex-row md:items-center md:gap-6">
           <div className="flex items-center gap-3 flex-shrink-0">
-            <Link to="/"><img src={Logo} alt="Logo da Infinity Cars" className="max-w-50" /></Link>
+            <Link to="/"><img src={"/images/logos/logo.webp"} alt="Logo da Infinity Cars" className="max-w-50" /></Link>
           </div>
           <p className="mt-4 md:mt-0 text-sm leading-relaxed max-w-4xl">
             O <strong>PASSA A BOLA</strong> é uma marca influente e <strong>o maior canal de futebol feminino da América do Sul e Latina</strong>, fundada por Luana Maluf e Alê Xavier. Com um forte dever social, a iniciativa visa impulsionar e melhorar o futebol feminino na sociedade brasileira.
@@ -22,7 +20,8 @@ function Footer() {
             <h4 className="text-white font-semibold !text-lg">Navegação</h4>
 
             <Link to="/encontros" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Próximos Encontros</Link>
-            <Link to="/placares" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Placares e Notícias</Link>
+            <Link to="/placares" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Placares</Link>
+            <Link to="/noticias" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Notícias</Link>
             <Link to="/sobre" className="hover:text-[#981FBA] transition-colors w-fit underline !text-base">Sobre</Link>
           </div>
 

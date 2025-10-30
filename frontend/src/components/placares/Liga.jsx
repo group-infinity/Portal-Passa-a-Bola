@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { getLigas } from "../../services/LigaService";
+
 import LigaHeader from "./LigaHeader";
 import Jogo from "./Jogo";
 import Modal from "./Modal";
+import Loading from "../utils/Loading";
 
 function Liga() {
   const [modalActive, setModalActive] = useState(false);
@@ -59,11 +61,12 @@ function Liga() {
   };
 
   if (loading) {
-    return <p>Carregando placares...</p>;
+    return <Loading cor="#6EAA38" txt="Buscando ligas..." />;
   }
 
   return (
     <>
+      {/* {loading && <Loading cor="#6EAA38" txt="Buscando ligas..." />} */}
       {ligasExibidas.length === 0 ? (
         <p>Nenhuma liga disponível no momento.</p>
       ) : (
@@ -72,12 +75,13 @@ function Liga() {
           umMesAtras.setMonth(umMesAtras.getMonth() - 1);
 
           const jogosPassadosRecentes = liga.jogosPassados
-            .filter(jogo => new Date(jogo.dateEvent) >= umMesAtras)
+            .filter((jogo) => new Date(jogo.dateEvent) >= umMesAtras)
             .slice(0, 2);
 
-          const jogosParaExibir = liga.jogosFuturos.length > 0
-            ? liga.jogosFuturos
-            : jogosPassadosRecentes;
+          const jogosParaExibir =
+            liga.jogosFuturos.length > 0
+              ? liga.jogosFuturos
+              : jogosPassadosRecentes;
 
           if (jogosParaExibir.length === 0) {
             return null;

@@ -1,8 +1,8 @@
-function Noticia({ titulo, resumo, fonte, tempo, img }) {
+function Noticia({ titulo, resumo, fonte, tempo, img, link }) {
   return (
     <div className="flex h-fit flex-col gap-2.5 rounded-sm border-1 border-[rgba(0,0,0,0.25)] p-2.5 md:p-5">
       <div>
-        <a href="#">
+        <a href={link}>
           <img
             src={img}
             alt={titulo}
@@ -14,7 +14,7 @@ function Noticia({ titulo, resumo, fonte, tempo, img }) {
 
       <div className="flex w-full flex-col gap-2.5">
         <h3 className="line-clamp-2 h-fit w-full !text-xl lg:!text-3xl font-black">
-          <a href="#">{titulo}</a>
+          <a href={link}>{titulo}</a>
         </h3>
         <p className="line-clamp-2 text-wrap text-sm lg:text-lg">{resumo}</p>
       </div>

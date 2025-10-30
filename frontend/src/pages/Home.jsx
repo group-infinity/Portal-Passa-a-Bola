@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import Banner from "../components/home/Banner";
@@ -8,17 +8,23 @@ import Liga from "../components/placares/Liga";
 import GrupoNoticias from "../components/noticias/GrupoNoticias";
 import SobreSecoes from "../components/home/SobreSecoes";
 import Faq from "../components/home/Faq";
+import Loading from "../components/utils/Loading";
 
 import { getEncontros } from "../services/EncontroService";
-
-import Logo from "../assets/logoPb.webp";
-import FaixaVerde from "../assets/sections/faixa-verde.webp";
-import FaixaVermelha from "../assets/sections/faixa-vermelha.webp";
-import FaixaRoxa from "../assets/sections/faixa-roxa.webp";
 
 function Home() {
   const [encontros, setEncontros] = useState([]);
   const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef(null);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(error => {
+        console.warn("A reprodução automática do vídeo foi bloqueada pelo navegador:", error);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const fetchEncontros = async () => {
@@ -35,6 +41,16 @@ function Home() {
     fetchEncontros();
   }, []);
 
+  const scroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === "left" ? -350 : 350;
+      scrollContainerRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
   const calcularVagasOcupadas = (encontro) => {
     return encontro.inscricoes.reduce((total, insc) => {
       return total + (insc.tipo === "conjunta" ? insc.membros.length : 1);
@@ -42,22 +58,25 @@ function Home() {
   };
 
   return (
-    <div className="relative flex flex-col items-center pt-16 lg:pt-20">
+    <div className="relative mt-16 flex flex-col items-center lg:mt-20">
       <section className="relative -z-999 h-[85lvh] w-full overflow-hidden">
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-0 h-full w-full object-cover"
+          controls={false}
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover pointer-events-none hero-video"
         >
           <source src="/passaabola.webm" type="video/webm" />
+          <source src="/passaabola.mp4" type="video/mp4" />
         </video>
 
-        <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/100 via-transparent to-black/100"></div>
+        <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/75 via-transparent to-black/75"></div>
 
         <div className="relative z-30 inline-grid h-full w-full p-6">
-          <div className="w-full self-start text-white md:max-w-1/2">
+          <div className="w-full self-start text-white md:max-w-3/4">
             <h1 className="font-[Anton] text-4xl md:text-6xl">
               A <span className="text-[#981FBA] lg:text-7xl"> CASA </span> DO
               FUTEBOL FEMININO!
@@ -68,7 +87,7 @@ function Home() {
             </p>
           </div>
           <img
-            src={Logo}
+            src="/images/logos/logoPb.webp"
             alt="Logo do Passa a Bola"
             className="h-15 w-15 self-end justify-self-center opacity-70"
           />
@@ -78,7 +97,7 @@ function Home() {
       <div className="flex w-full flex-col items-center gap-4">
         <section className="h-fit w-full">
           <Banner
-            img={FaixaVermelha}
+            img={"/images/sections/faixa-vermelha.webp"}
             cor={"#BA1B31"}
             txt={"próximos encontros"}
           />
@@ -88,30 +107,58 @@ function Home() {
               txt="Jogue com a gente! Gratuito e para todas."
             />
 
-            <div className="relative mt-4 flex w-full flex-col gap-4">
-              <div className="flex gap-3 overflow-x-auto pb-4">
-                {loading ? (
-                  <p>Carregando encontros...</p>
-                ) : (
-                  encontros.map((encontroItem, index) => {
-                    const vagasOcupadas = calcularVagasOcupadas(encontroItem);
-                    const isFull = vagasOcupadas >= encontroItem.totalVagas;
+            <div className="relative mt-4 flex w-full flex-col items-center gap-4">
+              <div className="relative flex w-full items-center justify-center">
+                <button
+                  onClick={() => scroll("left")}
+                  className="absolute top-1/2 -left-16 z-10 hidden -translate-y-1/2 cursor-pointer p-2 md:block"
+                  aria-label="Rolar para a esquerda"
+                >
+                  <ChevronLeft className="size-10 text-gray-500" />
+                </button>
+                <div
+                  ref={scrollContainerRef}
+                  className="flex w-full justify-center gap-3 overflow-x-auto scroll-smooth pb-4"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  {loading && (
+                    <Loading cor="#BA1B31" txt="Buscando encontros..." />
+                  )}
 
-                    return (
-                      <Encontro
-                        key={index}
-                        id={encontroItem.id}
-                        nome={encontroItem.nome}
-                        diaI={encontroItem.diaI}
-                        diaF={encontroItem.diaF}
-                        vagas={encontroItem.totalVagas}
-                        atual={vagasOcupadas}
-                        isFull={isFull}
-                        encontro={false}
-                      />
-                    );
-                  })
-                )}
+                  {!loading && encontros.length === 0 ? (
+                    <p>Não há encontros ativos.</p>
+                  ) : !loading && (
+                    <div className="flex w-full">
+                      {encontros.map((encontroItem, index) => {
+                        const vagasOcupadas =
+                          calcularVagasOcupadas(encontroItem);
+                        const isFull = vagasOcupadas >= encontroItem.totalVagas;
+
+                        return (
+                          <Encontro
+                            key={index}
+                            id={encontroItem.id}
+                            nome={encontroItem.nome}
+                            diaI={encontroItem.diaI}
+                            diaF={encontroItem.diaF}
+                            vagas={encontroItem.totalVagas}
+                            local={encontroItem.local}
+                            atual={vagasOcupadas}
+                            isFull={isFull}
+                            encontro={false}
+                          />
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => scroll("right")}
+                  className="absolute top-1/2 -right-16 z-10 hidden -translate-y-1/2 cursor-pointer p-2 md:block"
+                  aria-label="Rolar para a direita"
+                >
+                  <ChevronRight className="size-10 text-gray-500" />
+                </button>
               </div>
               <div className="flex w-full justify-between">
                 <div className="flex max-w-1/2 flex-col gap-1 opacity-50">
@@ -137,7 +184,7 @@ function Home() {
 
         <section className="h-fit w-full">
           <Banner
-            img={FaixaVerde}
+            img={"/images/sections/faixa-verde.webp"}
             cor={"#6EAA38"}
             txt={"placares e notícias"}
           />
@@ -186,7 +233,7 @@ function Home() {
 
         <section className="h-fit w-full">
           <Banner
-            img={FaixaRoxa}
+            img={"/images/sections/faixa-roxa.webp"}
             cor={"#981FBA"}
             txt={"perguntas frequentes"}
           />

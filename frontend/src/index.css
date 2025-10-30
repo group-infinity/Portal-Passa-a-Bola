@@ -3,3 +3,10 @@
 body{
   font-family: "Lato", Arial, Helvetica, sans-serif;
 }
+
+/* Hide Safari/iOS overlay controls for the homepage hero background video */
+.hero-video::-webkit-media-controls-enclosure { display: none !important; }
+.hero-video::-webkit-media-controls { display: none !important; }
+.hero-video::-webkit-media-controls-panel { display: none !important; }
+.hero-video::-webkit-media-controls-play-button { display: none !important; }
+.hero-video::-webkit-media-controls-start-playback-button { display: none !important; }

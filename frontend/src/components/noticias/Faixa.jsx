@@ -7,7 +7,7 @@ const Faixa = ({txt, bg}) => {
         className="absolute -z-999 select-none"
       />
 
-      <h1 className="font-[Anton] !text-5xl text-white uppercase">{txt}</h1>
+      <h1 className="font-[Anton] !text-5xl text-white uppercase text-center">{txt}</h1>
     </div>
   );
 };

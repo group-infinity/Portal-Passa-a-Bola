@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,11 +6,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { createEncontro } from "../../services/EncontroService";
 
-import BannerVermelho from "../../assets/sections/banner-verm.webp";
-
 import Input from "../../components/cadastro/Input";
 import Botao from "../../components/cadastro/Botao";
 import Faixa from "../../components/noticias/Faixa";
+import AvisoModal from "../../components/utils/AvisoModal";
 
 const formatarDataParaBR = (data) => {
   if (!data) return "";
@@ -31,6 +30,7 @@ const encontroSchema = z
     diaF: z.string(),
     jogadorasPorTime: z.string(),
     totalVagas: z.string(),
+    local: z.string(),
   })
   .superRefine((data, ctx) => {
     if (data.nome.length < 3) {
@@ -85,7 +85,6 @@ const encontroSchema = z
       });
     } else {
       const totalVagas = Number(data.totalVagas);
-      const numJogadoras = Number(data.jogadorasPorTime);
 
       if (totalVagas <= 0) {
         ctx.addIssue({
@@ -94,23 +93,14 @@ const encontroSchema = z
           message: "O total de vagas deve ser maior que zero.",
         });
       }
+    }
 
-      if (numJogadoras > 0 && totalVagas % numJogadoras !== 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["totalVagas"],
-          message: `Total de vagas deve ser divisível por ${numJogadoras}.`,
-        });
-      } else if (numJogadoras > 0) {
-        const numeroDeTimes = totalVagas / numJogadoras;
-        if (numeroDeTimes % 2 !== 0) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["totalVagas"],
-            message: `Cria um número ímpar de times (${numeroDeTimes}). Ajuste as vagas para formar um número par de times.`,
-          });
-        }
-      }
+    if (!data.local || data.local.trim().length < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["local"],
+        message: "O local do encontro é obrigatório e deve ter pelo menos 3 caracteres.",
+      });
     }
   });
 
@@ -125,6 +115,7 @@ const CriarEncontro = () => {
   });
   const { token } = useAuth();
   const navigate = useNavigate();
+  const [modalState, setModalState] = useState({ isOpen: false, title: '', body: '', onConfirm: null });
 
   const diaInicioSelecionado = watch("diaI");
 
@@ -137,85 +128,119 @@ const CriarEncontro = () => {
         jogadorasPorTime: Number(data.jogadorasPorTime),
       };
       await createEncontro(dadosFormatados, token);
-      alert("Encontro criado com sucesso!");
-      navigate("/encontros");
+      setModalState({
+        isOpen: true,
+        title: "Sucesso!",
+        body: "Encontro criado com sucesso!",
+        onConfirm: () => navigate("/encontros"),
+      });
     } catch (error) {
-      alert(`Erro ao criar encontro: ${error.message}`);
+        setModalState({
+            isOpen: true,
+            title: "Erro",
+            body: `Erro ao criar encontro: ${error.message}`,
+            onConfirm: null,
+          });
+    }
+  };
+
+  const handleCloseModal = () => {
+    const action = modalState.onConfirm;
+    setModalState({ isOpen: false, title: '', body: '', onConfirm: null });
+    if (action) {
+      action();
     }
   };
 
   return (
-    <div className="mt-16 flex w-full flex-col items-center py-16 lg:py-30">
-      <div className="w-full px-6 md:max-w-[60%] lg:max-w-[45%]">
-        <Faixa txt={"novo encontro"} bg={BannerVermelho} />
+    <>
+      <AvisoModal
+        isOpen={modalState.isOpen}
+        onClose={handleCloseModal}
+        title={modalState.title}
+      >
+        <p>{modalState.body}</p>
+      </AvisoModal>
 
-        <form
-          onSubmit={handleSubmit(handleCreateEncontro)}
-          className="mt-12 flex w-full flex-col gap-7"
-        >
-          <div className="flex flex-col gap-5">
-            <Input
-              label="Nome do Encontro"
-              type="text"
-              register={{ ...register("nome") }}
-              error={errors.nome}
-            />
-            <Input
-              label="Data de Início"
-              type="date"
-              min={getHoje()}
-              register={{ ...register("diaI") }}
-              error={errors.diaI}
-            />
-            <Input
-              label="Data de Fim das Inscrições"
-              type="date"
-              min={diaInicioSelecionado || getHoje()}
-              register={{ ...register("diaF") }}
-              error={errors.diaF}
-            />
+      <div className="mt-16 flex w-full flex-col items-center py-16 lg:py-30">
+        <div className="w-full px-6 md:max-w-[60%] lg:max-w-[45%]">
+          <Faixa txt={"novo encontro"} bg={"/images/sections/banner-verm.webp"} />
 
-            <div className="flex w-full flex-col gap-2">
-              <label
-                htmlFor="jogadorasPorTime"
-                className="w-fit text-lg font-black"
-              >
-                Jogadoras por Time
-              </label>
-              <select
-                {...register("jogadorasPorTime")}
-                id="jogadorasPorTime"
-                className="w-full border-b-2 px-1.5 pt-2.5 pb-1 text-left text-lg font-bold outline-0"
-              >
-                <option value="">Selecione...</option>
-                <option value="5">5 jogadoras</option>
-                <option value="7">7 jogadoras</option>
-                <option value="11">11 jogadoras</option>
-              </select>
-              {errors.jogadorasPorTime && (
-                <p className="mt-1 text-sm text-red-500">
-                  {errors.jogadorasPorTime.message}
-                </p>
-              )}
+          <form
+            onSubmit={handleSubmit(handleCreateEncontro)}
+            className="mt-12 flex w-full flex-col gap-7"
+          >
+            <div className="flex flex-col gap-5">
+              <Input
+                label="Nome do Encontro"
+                type="text"
+                register={{ ...register("nome") }}
+                error={errors.nome}
+              />
+              <Input
+                label="Data do Encontro"
+                type="date"
+                min={getHoje()}
+                register={{ ...register("diaI") }}
+                error={errors.diaI}
+              />
+              <Input
+                label="Data de Término das Inscrições"
+                type="date"
+                min={diaInicioSelecionado || getHoje()}
+                register={{ ...register("diaF") }}
+                error={errors.diaF}
+              />
+
+              <div className="flex w-full flex-col gap-2">
+                <label
+                  htmlFor="jogadorasPorTime"
+                  className="w-fit text-lg font-black"
+                >
+                  Jogadoras por Time
+                </label>
+                <select
+                  {...register("jogadorasPorTime")}
+                  id="jogadorasPorTime"
+                  className="w-full border-b-2 px-1.5 pt-2.5 pb-1 text-left text-lg font-bold outline-0"
+                >
+                  <option value="">Selecione...</option>
+                  <option value="5">5 jogadoras</option>
+                  <option value="7">7 jogadoras</option>
+                  <option value="11">11 jogadoras</option>
+                </select>
+                {errors.jogadorasPorTime && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.jogadorasPorTime.message}
+                  </p>
+                )}
+              </div>
+
+              <Input
+                label="Total de Vagas"
+                type="number"
+                placeholder="Ex: 40"
+                register={{ ...register("totalVagas") }}
+                error={errors.totalVagas}
+              />
+              <Input
+                label="Local do Encontro"
+                type="text"
+                placeholder="Ex: Estádio Municipal"
+                register={{ ...register("local") }}
+                error={errors.local}
+              />
             </div>
-
-            <Input
-              label="Total de Vagas"
-              type="number"
-              placeholder="Ex: 40"
-              register={{ ...register("totalVagas") }}
-              error={errors.totalVagas}
+            <Botao
+              txt={"criar encontro"}
+              color={"#BA1B31"}
+              colorHover={"#7D1220"}
+              disabled={isSubmitting}
             />
-          </div>
-          <Botao
-            txt={"criar encontro"}
-            color={"#BA1B31"}
-            colorHover={"#7D1220"}
-            disabled={isSubmitting}
-          />
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

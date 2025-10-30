@@ -26,7 +26,7 @@ const fetchAndCache = async (endpoint, ttl) => {
 export const getAllLigas = async (req, res) => {
   try {
     const ligas = [
-      { id: 5201, nome: "Brasileirão Feminino" },
+      { id: 5704, nome: "Copa Libertadores Feminina" },
       { id: 4521, nome: "Liga Nacional de Futebol Feminino (NWSL - EUA)" },
       { id: 4887, nome: "Copa da Liga Feminina da FA" },
       { id: 4849, nome: "Superliga Feminina Inglesa" },
@@ -35,20 +35,24 @@ export const getAllLigas = async (req, res) => {
       { id: 5384, nome: "Futebol Feminino nas Olimpíadas" },
     ].slice(0,3);
 
-    let resultados = [];
-    for (const liga of ligas) {
-      const infoLiga = await fetchAndCache(`lookupleague.php?id=${liga.id}`, 86400);
-      const jogosFuturos = await fetchAndCache(`eventsnextleague.php?id=${liga.id}`, 300);
-      const jogosPassados = await fetchAndCache(`eventspastleague.php?id=${liga.id}`, 300);
+    const resultados = await Promise.all(
+      ligas.map(async (liga) => {
+        const [infoLiga, jogosFuturos, jogosPassados] = await Promise.all([
+          fetchAndCache(`lookupleague.php?id=${liga.id}`, 86400),
+          fetchAndCache(`eventsnextleague.php?id=${liga.id}`, 300),
+          fetchAndCache(`eventspastleague.php?id=${liga.id}`, 300),
+        ]);
 
-      resultados.push({
-        id: liga.id,
-        nome: liga.nome,
-        info: infoLiga.leagues ? { ...infoLiga.leagues[0], strLeague: liga.nome } : null,
-        jogosFuturos: jogosFuturos.events || [],
-        jogosPassados: jogosPassados.events || [],
-      });
-    }
+        return {
+          id: liga.id,
+          nome: liga.nome,
+          info: infoLiga.leagues ? { ...infoLiga.leagues[0], strLeague: liga.nome } : null,
+          jogosFuturos: jogosFuturos.events || [],
+          jogosPassados: jogosPassados.events || [],
+        };
+      })
+    );
+
     res.json(resultados);
   } catch (error) {
     console.error("Erro ao buscar dados das ligas:", error.message);

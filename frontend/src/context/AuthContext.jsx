@@ -5,12 +5,19 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user from localStorage", e);
+        localStorage.removeItem('user');
+      }
     }
+    setLoading(false);
   }, []);
 
   const login = (userData, userToken) => {
@@ -25,14 +32,19 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    window.location.reload();
+    window.location.href = "/login";
   };
+
+  const updateUser = (newUserData) => {
+    setUser(newUserData);
+    localStorage.setItem('user', JSON.stringify(newUserData));
+  }
 
   const isAdmin = user && user.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, token, isAdmin, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, token, isAdmin, login, logout, loading, updateUser }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
