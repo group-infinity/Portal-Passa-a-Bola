@@ -406,4 +406,3 @@ Busca os últimos 20 registros de saúde de um usuário. (Requer token).
 - **Luara Soares**, RM561266
 - **Miguel Amaro**, RM566200
 - **Pedro Henrique Caires**, RM562344
-•Pedro Henrique Caires, RM562344
