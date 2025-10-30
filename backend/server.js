@@ -12,6 +12,7 @@ const allowedOrigins = [
   'http://127.0.0.1:5173',
   'http://localhost:5173',
   'https://passaabola-git-dev-maldak123s-projects.vercel.app',
+  'https://portal-passa-a-bola-two.vercel.app',
   'https://www.passaabolateste.app',
   'https://passaabolateste.app',
 ];
